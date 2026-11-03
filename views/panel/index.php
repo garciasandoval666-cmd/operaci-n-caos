@@ -19,6 +19,10 @@ $etapas = [
     'realizado'      => 'Realizado',
     'cerrado'        => 'Cerrado',
 ];
+
+// El panel es la portada de todos los roles, pero no todos pueden ver dinero:
+// los bloques de ingresos y cobranza se omiten para quien tiene /pagos en 403.
+$veDinero = puede(roles_grupo('dinero'));
 ?>
 <div class="page-head">
     <div>
@@ -50,16 +54,24 @@ $etapas = [
             <p class="kpi__nota">Sin días bloqueados en los próximos 30</p>
         <?php endif; ?>
     </article>
-    <article class="kpi">
-        <p class="kpi__top"><?= icono('pagos') ?> Ingresos del mes</p>
-        <p class="kpi__valor"><?= e(money_corto($kpis['ingresos_mes'])) ?></p>
-        <p class="kpi__nota">Pagos aplicados y no revertidos</p>
-    </article>
-    <article class="kpi">
-        <p class="kpi__top"><?= icono('cotizacion') ?> Por cobrar</p>
-        <p class="kpi__valor"><?= e(money_corto($kpis['por_cobrar'])) ?></p>
-        <p class="kpi__nota">Saldo de cotizaciones aceptadas</p>
-    </article>
+    <?php if ($veDinero): ?>
+        <article class="kpi">
+            <p class="kpi__top"><?= icono('pagos') ?> Ingresos del mes</p>
+            <p class="kpi__valor"><?= e(money_corto($kpis['ingresos_mes'])) ?></p>
+            <p class="kpi__nota">Pagos aplicados y no revertidos</p>
+        </article>
+        <article class="kpi">
+            <p class="kpi__top"><?= icono('cotizacion') ?> Por cobrar</p>
+            <p class="kpi__valor"><?= e(money_corto($kpis['por_cobrar'])) ?></p>
+            <p class="kpi__nota">Saldo de cotizaciones aceptadas</p>
+        </article>
+    <?php else: ?>
+        <article class="kpi">
+            <p class="kpi__top"><?= icono('invitados') ?> Invitados confirmados</p>
+            <p class="kpi__valor"><?= (int) $kpis['confirmados'] ?></p>
+            <p class="kpi__nota">RSVP confirmados en eventos activos</p>
+        </article>
+    <?php endif; ?>
 </div>
 
 <div class="grid grid-4 mb-3">
@@ -97,7 +109,7 @@ $etapas = [
                                 <th>Fecha</th>
                                 <th>Espacio</th>
                                 <th class="num">Confirmados</th>
-                                <th class="num">Saldo</th>
+                                <?php if ($veDinero): ?><th class="num">Saldo</th><?php endif; ?>
                                 <th>Estado</th>
                             </tr>
                         </thead>
@@ -119,7 +131,7 @@ $etapas = [
                                 </td>
                                 <td><?= $evento['espacio'] ? e($evento['espacio']) : '<span class="texto-aviso">Sin espacio</span>' ?></td>
                                 <td class="num"><?= (int) $evento['confirmados'] ?> / <?= (int) $evento['aforo_maximo'] ?></td>
-                                <td class="num"><?= e(money($evento['saldo'])) ?></td>
+                                <?php if ($veDinero): ?><td class="num"><?= e(money($evento['saldo'])) ?></td><?php endif; ?>
                                 <td><?= badge_estado($evento['estado']) ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -215,6 +227,7 @@ $etapas = [
             </div>
         </section>
 
+        <?php if ($veDinero): ?>
         <section class="card">
             <div class="card__head">
                 <div><h2>Cobranza pendiente</h2><p>Cotizaciones aceptadas con saldo.</p></div>
@@ -246,6 +259,7 @@ $etapas = [
                 <?php endif; ?>
             </div>
         </section>
+        <?php endif; ?>
 
         <section class="card">
             <div class="card__head">
@@ -255,9 +269,9 @@ $etapas = [
                 <div class="timeline">
                     <?php foreach ($actividad as $movimiento): ?>
                         <div class="timeline__item">
-                            <span class="timeline__punto"><?= icono('destello') ?></span>
+                            <span class="timeline__punto"><?= icono(accion_icono((string) $movimiento['accion'])) ?></span>
                             <div class="timeline__cuerpo">
-                                <b><?= e(str_replace('_', ' ', $movimiento['accion'])) ?></b>
+                                <b><?= e(accion_legible((string) $movimiento['accion'])) ?></b>
                                 <span><?= e($movimiento['usuario'] ?? 'Sistema') ?> · <?= e(fecha_hora($movimiento['fecha'])) ?></span>
                                 <?php if ($movimiento['detalle'] !== ''): ?>
                                     <p><?= e(recortar($movimiento['detalle'], 90)) ?></p>

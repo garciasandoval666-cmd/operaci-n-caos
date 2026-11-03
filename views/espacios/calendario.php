@@ -61,9 +61,9 @@ $diasMes = count(array_filter($celdas, static fn (array $c): bool => !empty($c['
             </div>
 
             <div class="cal__leyenda">
-                <span><i style="background:var(--lime-soft);border:1px solid #dbe8b4"></i> Día bloqueado por reserva confirmada</span>
+                <span><i style="background:var(--lime-soft);border:1px solid var(--menta-2)"></i> Día bloqueado por reserva confirmada</span>
                 <span><i style="background:var(--ink)"></i> Hoy</span>
-                <span><i style="background:#fff;border:1px solid var(--line)"></i> Disponible</span>
+                <span><i style="background:var(--surface);border:1px solid var(--line)"></i> Disponible</span>
             </div>
         </section>
 

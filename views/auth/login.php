@@ -25,9 +25,9 @@ $esLocal = (string) env('APP_ENV', 'production') === 'local';
             </ul>
         </div>
 
-        <div class="fila fila--entre" style="color:#8f98aa;font-size:11px">
+        <div class="auth__pie">
             <span>Ciudad de México · 2026</span>
-            <a href="<?= e(url('/boda')) ?>" style="color:#c9f24d">Bodas <?= icono('flecha') ?></a>
+            <a href="<?= e(url('/boda')) ?>">Historias del recinto <?= icono('flecha') ?></a>
         </div>
     </section>
 
@@ -59,7 +59,7 @@ $esLocal = (string) env('APP_ENV', 'production') === 'local';
                            autocomplete="current-password" minlength="8" placeholder="••••••••">
                 </div>
 
-                <button class="btn btn--lima btn--bloque" type="submit"><?= icono('llave') ?> Entrar al panel</button>
+                <button class="btn btn--primario btn--bloque" type="submit"><?= icono('llave') ?> Entrar al panel</button>
             </form>
 
             <?php if ($esLocal): ?>

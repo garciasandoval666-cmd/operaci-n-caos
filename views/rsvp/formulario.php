@@ -17,9 +17,9 @@ $estadoActual = $invitado['estado_rsvp'] ?? 'pendiente';
 <div class="b-rsvp">
     <aside class="b-rsvp__visual">
         <img src="https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1400"
-             alt="Mesa preparada para una celebración de boda">
+             alt="Mesa preparada para una celebración en el recinto">
         <div class="b-rsvp__leyenda">
-            <span>ConectaEventos · Bodas</span>
+            <span>ConectaEventos · Invitación</span>
             <h2>Nos encantará<br>verte ahí.</h2>
             <p>Confirma tu lugar, elige tu menú y cuéntanos si necesitas alguna consideración especial.</p>
         </div>
@@ -28,7 +28,7 @@ $estadoActual = $invitado['estado_rsvp'] ?? 'pendiente';
     <section class="b-rsvp__panel">
         <div class="b-rsvp__caja">
             <a href="<?= e(url('/boda')) ?>" class="b-eyebrow" style="text-decoration:none">
-                <?= icono('atras') ?> Volver a la boda
+                <?= icono('atras') ?> Volver al sitio
             </a>
 
             <?php if ($error !== null): ?>

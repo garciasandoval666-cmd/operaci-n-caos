@@ -1,0 +1,46 @@
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*service-account*
+
+# Dependencias
+/vendor/
+/node_modules/
+
+# Almacenamiento y respaldos
+/storage/logs/*.log
+/storage/backups/*.sql
+/storage/cache/
+/storage/mysql-data/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# Editores
+.vscode/
+.idea/
+*.sublime-*
+
+# --- Fuera del repositorio compartido ------------------------------------
+# Lo que sigue no es programacion del sistema. Para subir cualquiera de estos
+# bloques basta con borrar sus lineas: no hay nada mas que hacer.
+
+# Documentos de entrada del caso y sus volcados de texto
+*.pdf
+*.docx
+*.doc
+docx_text.txt
+pdf_text.txt
+
+# Arranque local: depende de esta instalacion de XAMPP (C:\xampp2)
+iniciar.bat
+
+# Documentacion del proyecto
+/docs/

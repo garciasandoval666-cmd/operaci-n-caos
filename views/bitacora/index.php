@@ -106,7 +106,7 @@ $tonoAccion = static function (string $accion): string {
                 <select class="select" id="accion" name="accion">
                     <option value="">Todas</option>
                     <?php foreach ($acciones as $item): ?>
-                        <option value="<?= e($item) ?>" <?= $item === $accion ? 'selected' : '' ?>><?= e(str_replace('_', ' ', $item)) ?></option>
+                        <option value="<?= e($item) ?>" <?= $item === $accion ? 'selected' : '' ?>><?= e(accion_legible((string) $item)) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -173,7 +173,7 @@ $tonoAccion = static function (string $accion): string {
                             <span class="texto-muted texto-xs mono"><?= e(date('H:i:s', strtotime($registro['fecha']))) ?></span>
                         </td>
                         <td>
-                            <?= badge(str_replace('_', ' ', (string) $registro['accion']), $tonoAccion((string) $registro['accion'])) ?>
+                            <?= badge(accion_legible((string) $registro['accion']), $tonoAccion((string) $registro['accion'])) ?>
                         </td>
                         <td>
                             <?php if ($registro['entidad'] !== ''): ?>

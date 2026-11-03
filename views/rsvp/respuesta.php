@@ -29,9 +29,9 @@ $config = match ($estado) {
 <div class="b-rsvp">
     <aside class="b-rsvp__visual">
         <img src="https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?auto=compress&cs=tinysrgb&w=1400"
-             alt="Detalle de una celebración de boda">
+             alt="Detalle de una celebración en el recinto">
         <div class="b-rsvp__leyenda">
-            <span>ConectaEventos · Bodas</span>
+            <span>ConectaEventos · Invitación</span>
             <h2>Gracias por<br>responder.</h2>
             <p>Cada confirmación nos ayuda a preparar una celebración más cuidada para todos.</p>
         </div>
@@ -58,7 +58,7 @@ $config = match ($estado) {
                     <?= e($config['nota']) ?>
                 </div>
 
-                <a class="b-btn" href="<?= e(url('/boda')) ?>">Volver a la boda</a>
+                <a class="b-btn" href="<?= e(url('/boda')) ?>">Volver al sitio</a>
             </div>
 
             <p class="b-rsvp__pie">

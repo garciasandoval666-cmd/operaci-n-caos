@@ -1,0 +1,64 @@
+# ConectaEventos · front controller
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Sin RewriteBase: Apache deduce la base sola, así el mismo .htaccess
+    # funciona en la raíz del VirtualHost y bajo el alias /conectaeventos.
+
+    # Perímetro: carpetas internas y dotfiles nunca se sirven
+    RewriteRule ^(?:storage|database|docs|tests|src|views)(?:/|$) - [F,L]
+    RewriteRule ^\. - [F,L]
+
+    # Archivos y carpetas reales se sirven directamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Todo lo demás pasa por el front controller
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Artefactos que jamás deben descargarse aunque estén en una carpeta pública.
+# Se incluyen los documentos de origen del proyecto (el PDF de requisitos, los
+# dos .docx de diseño y sus volcados .txt): viven en la raíz, que es el
+# DocumentRoot, y Apache los serviría tal cual antes de llegar al front
+# controller. No contienen secretos, pero no son material público.
+<FilesMatch "\.(sql|md|log|bak|ini|sh|bat|lock|env|pem|key|p12|docx|doc|pdf|txt|mmd|csv)$">
+    Require all denied
+</FilesMatch>
+
+# Excepción: los archivos que los buscadores y navegadores sí deben leer.
+<FilesMatch "^(robots\.txt|humans\.txt)$">
+    Require all granted
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+    Header unset X-Powered-By
+
+    # Solo se envía sobre HTTPS (los navegadores lo ignoran en HTTP)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+
+    # CSP: scripts y estilos propios; fuentes de Google y fotos de Pexels.
+    # Los estilos en línea siguen permitidos porque las vistas usan style="width:…"
+    # para barras y avatares; no hay scripts en línea.
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' https://images.pexels.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>

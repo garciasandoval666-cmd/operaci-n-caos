@@ -82,7 +82,7 @@ $avance = (int) ($stats['confirmados'] ?? 0) > 0 ? min(100, round(((int) $stats[
                     <form class="fila" method="post" action="<?= e(url('/checkin')) ?>">
                         <?= csrf_field() ?>
                         <input type="hidden" name="id_evento" value="<?= $idEvento ?>">
-                        <input class="input" type="text" name="codigo" placeholder="Código de 32 caracteres o número de invitado" required autofocus style="flex:1">
+                        <input class="input" type="text" name="codigo" placeholder="Código de 32 caracteres del enlace RSVP" required autofocus minlength="32" maxlength="32" style="flex:1">
                         <button class="btn btn--lima" type="submit"><?= icono('check') ?> Registrar entrada</button>
                     </form>
                 </div>

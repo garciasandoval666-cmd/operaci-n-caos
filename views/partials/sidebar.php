@@ -16,7 +16,9 @@ $u = usuario_actual();
             <p class="nav-grupo__titulo">Operación</p>
             <a class="nav-item<?= nav_activo('/panel', '/buscar') ?>" href="<?= e(url('/panel')) ?>"><?= icono('panel') ?> Panel</a>
             <a class="nav-item<?= nav_activo('/eventos') ?>" href="<?= e(url('/eventos')) ?>"><?= icono('calendario') ?> Eventos</a>
-            <a class="nav-item<?= nav_activo('/clientes') ?>" href="<?= e(url('/clientes')) ?>"><?= icono('clientes') ?> Clientes</a>
+            <?php if (puede(roles_grupo('clientes'))): ?>
+                <a class="nav-item<?= nav_activo('/clientes') ?>" href="<?= e(url('/clientes')) ?>"><?= icono('clientes') ?> Clientes</a>
+            <?php endif; ?>
             <a class="nav-item<?= nav_activo('/invitados') ?>" href="<?= e(url('/invitados')) ?>"><?= icono('invitados') ?> Invitados</a>
             <?php if (puede(['administrador', 'coordinador', 'recepcion'])): ?>
                 <a class="nav-item<?= nav_activo('/checkin') ?>" href="<?= e(url('/checkin')) ?>"><?= icono('check') ?> Check-in</a>
@@ -29,15 +31,19 @@ $u = usuario_actual();
             <a class="nav-item<?= nav_activo('/recursos') ?>" href="<?= e(url('/recursos')) ?>"><?= icono('recursos') ?> Recursos</a>
             <a class="nav-item<?= nav_activo('/proveedores') ?>" href="<?= e(url('/proveedores')) ?>"><?= icono('proveedores') ?> Proveedores</a>
             <a class="nav-item<?= nav_activo('/reservas') ?>" href="<?= e(url('/reservas')) ?>"><?= icono('reservas') ?> Reservas</a>
-            <a class="nav-item<?= nav_activo('/insumos') ?>" href="<?= e(url('/insumos')) ?>"><?= icono('insumos') ?> Insumos</a>
+            <?php if (puede(roles_grupo('insumos'))): ?>
+                <a class="nav-item<?= nav_activo('/insumos') ?>" href="<?= e(url('/insumos')) ?>"><?= icono('insumos') ?> Insumos</a>
+            <?php endif; ?>
             <a class="nav-item<?= nav_activo('/menus') ?>" href="<?= e(url('/menus')) ?>"><?= icono('cubiertos') ?> Menús</a>
         </div>
 
+        <?php if (puede(roles_grupo('dinero'))): ?>
         <div class="nav-grupo">
             <p class="nav-grupo__titulo">Comercial y finanzas</p>
             <a class="nav-item<?= nav_activo('/cotizaciones') ?>" href="<?= e(url('/cotizaciones')) ?>"><?= icono('cotizacion') ?> Cotizaciones</a>
             <a class="nav-item<?= nav_activo('/pagos') ?>" href="<?= e(url('/pagos')) ?>"><?= icono('pagos') ?> Pagos</a>
         </div>
+        <?php endif; ?>
 
         <div class="nav-grupo">
             <p class="nav-grupo__titulo">Control</p>

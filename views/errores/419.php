@@ -6,6 +6,9 @@
     <p>Por seguridad, el formulario dejó de ser válido. Vuelve a cargar la página e inténtalo de nuevo.</p>
     <div class="fila" style="justify-content:center">
         <a class="btn btn--primario" href="<?= e(url('/login')) ?>"><?= icono('llave') ?> Iniciar sesión</a>
-        <a class="btn btn--claro" href="javascript:history.back()">Regresar</a>
+        <?php /* No se usa href="javascript:…": la CSP del .htaccess declara
+                 script-src 'self' y el navegador bloquea esos URL, con lo que el
+                 boton no hacia nada. Se resuelve con un manejador en app.js. */ ?>
+        <button class="btn btn--claro" type="button" data-atras>Regresar</button>
     </div>
 </div>

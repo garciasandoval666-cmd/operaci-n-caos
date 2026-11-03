@@ -56,10 +56,15 @@ $idsServicios = array_map(static fn (array $s): int => (int) $s['id_servicio'], 
     </div>
 </div>
 
-<div class="grid grid-4 mb-3">
-    <div class="mini-kpi"><?= icono('cotizacion') ?><div><b><?= e($cotizacion ? money_corto($cotizacion['total']) : '—') ?></b><span>Total cotizado</span></div></div>
-    <div class="mini-kpi"><?= icono('pagos') ?><div><b><?= e(money_corto($pagado)) ?></b><span>Pagado</span></div></div>
-    <div class="mini-kpi"><?= icono('alerta') ?><div><b class="<?= $saldo > 0.01 ? 'texto-error' : 'texto-ok' ?>"><?= e(money_corto($saldo)) ?></b><span>Saldo pendiente</span></div></div>
+<?php $veDinero = puede(roles_grupo('dinero')); ?>
+<div class="grid <?= $veDinero ? 'grid-4' : 'grid-2' ?> mb-3">
+    <?php if ($veDinero): ?>
+        <div class="mini-kpi"><?= icono('cotizacion') ?><div><b><?= e($cotizacion ? money_corto($cotizacion['total']) : '—') ?></b><span>Total cotizado</span></div></div>
+        <div class="mini-kpi"><?= icono('pagos') ?><div><b><?= e(money_corto($pagado)) ?></b><span>Pagado</span></div></div>
+        <div class="mini-kpi"><?= icono('alerta') ?><div><b class="<?= $saldo > 0.01 ? 'texto-error' : 'texto-ok' ?>"><?= e(money_corto($saldo)) ?></b><span>Saldo pendiente</span></div></div>
+    <?php else: ?>
+        <div class="mini-kpi"><?= icono('invitados') ?><div><b><?= (int) ($evento['aforo_maximo'] ?? 0) ?></b><span>Aforo máximo</span></div></div>
+    <?php endif; ?>
     <div class="mini-kpi"><?= icono('check') ?><div><b><?= $checkins ?></b><span>Check-in registrados</span></div></div>
 </div>
 
@@ -109,6 +114,7 @@ $idsServicios = array_map(static fn (array $s): int => (int) $s['id_servicio'], 
             </div>
         </section>
 
+        <?php if (puede(roles_grupo('dinero'))): ?>
         <section class="card">
             <div class="card__head">
                 <div><h2>Cotización y cobranza</h2><p>La versión más reciente es la que manda.</p></div>
@@ -208,6 +214,7 @@ $idsServicios = array_map(static fn (array $s): int => (int) $s['id_servicio'], 
                 </div>
             <?php endif; ?>
         </section>
+        <?php endif; ?>
 
         <div class="grid grid-2">
             <section class="card">

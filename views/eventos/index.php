@@ -8,6 +8,10 @@
 /** @var string|null $desde */
 /** @var string|null $hasta */
 /** @var int $porPagina */
+// El saldo del evento es dato financiero del cliente: no lo ven los roles que
+// tienen /pagos y /cotizaciones en 403.
+$veDinero = puede(roles_grupo('dinero'));
+
 $estados = [
     'prospecto'      => 'Prospecto',
     'cotizado'       => 'Cotizado',
@@ -98,7 +102,7 @@ $estados = [
                         <th>Fecha</th>
                         <th>Espacio</th>
                         <th class="num" title="Invitados confirmados / aforo máximo">Aforo</th>
-                        <th class="num">Saldo</th>
+                        <?php if ($veDinero): ?><th class="num">Saldo</th><?php endif; ?>
                         <th>Estado</th>
                         <th></th>
                     </tr>
@@ -121,7 +125,7 @@ $estados = [
                         </td>
                         <td class="ahorarap"><?= $evento['espacio'] ? e($evento['espacio']) : '<span class="texto-aviso">Sin espacio</span>' ?></td>
                         <td class="num"><?= (int) $evento['confirmados'] ?> / <?= (int) $evento['aforo_maximo'] ?></td>
-                        <td class="num"><?= e(money($evento['saldo'])) ?></td>
+                        <?php if ($veDinero): ?><td class="num"><?= e(money($evento['saldo'])) ?></td><?php endif; ?>
                         <td><?= badge_estado($evento['estado']) ?></td>
                         <td>
                             <div class="acciones">

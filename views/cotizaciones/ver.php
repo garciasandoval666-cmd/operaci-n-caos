@@ -69,6 +69,7 @@ $puedeGestionar = puede(['administrador', 'comercial', 'finanzas']);
             </div>
         </div>
 
+        <div class="doc__tabla">
         <table class="doc__lineas">
             <thead>
                 <tr>
@@ -83,7 +84,7 @@ $puedeGestionar = puede(['administrador', 'comercial', 'finanzas']);
                 <tr>
                     <td>
                         <b><?= e($linea['descripcion']) ?></b>
-                        <span class="texto-muted texto-xs" style="display:block;text-transform:uppercase;letter-spacing:.08em"><?= e(ucfirst($linea['tipo_concepto'])) ?></span>
+                        <span class="texto-muted texto-xs" style="display:block;text-transform:uppercase;letter-spacing:.08em"><?= e(['espacio' => 'Espacio', 'menu' => 'Menú', 'servicio' => 'Servicio', 'recurso' => 'Recurso', 'otro' => 'Otro'][$linea['tipo_concepto']] ?? ucfirst((string) $linea['tipo_concepto'])) ?></span>
                     </td>
                     <td class="num"><?= number_format((float) $linea['cantidad'], 2) ?></td>
                     <td class="num"><?= e(money($linea['precio_unitario'])) ?></td>
@@ -92,6 +93,7 @@ $puedeGestionar = puede(['administrador', 'comercial', 'finanzas']);
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
 
         <div class="doc__totales">
             <div class="doc__fila"><span>Subtotal</span><b><?= e(money($cotizacion['subtotal'])) ?></b></div>

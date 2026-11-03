@@ -2,553 +2,471 @@
 /** @var array $calendario */
 /** @var array $proximos */
 /** @var array $espacios */
+/** @var array $tipos */
 /** @var array $stats */
 /** @var string $mes */
 
-$foto = static fn (int $id, int $ancho = 1400): string =>
-    'https://images.pexels.com/photos/' . $id . '/pexels-photo-' . $id . '.jpeg?auto=compress&cs=tinysrgb&w=' . $ancho;
+/* El recinto se presenta por el catálogo completo de tipos de evento, no por
+   uno solo: la fila de la portada se arma con lo que haya en la base. */
 
-$erroresForm = errores();
-$anioActual = (int) date('Y');
-$tipos = ['Corporativo', 'Congreso', 'Exposición', 'Graduación', 'Social', 'XV Años', 'Boda', 'Concierto'];
+$aliados = [
+    'Casa Montiel', 'Florería Azahar', 'Sonido Nova', 'Banquetes Rubi',
+    'Lente Abierto', 'Mobiliario Lumen', 'Ritmo Vivo', 'Imprenta Sierra',
+];
+
+$etiquetasTipo = [
+    'salon_gala'      => 'Salón de gala',
+    'salon_fiesta'    => 'Salón de fiesta',
+    'sala_exhibicion' => 'Sala de exhibición',
+    'terraza'         => 'Terraza',
+    'jardin'          => 'Jardín',
+];
+
+$idealPara = [
+    'salon_gala'      => 'Bodas, galas corporativas y premiaciones',
+    'salon_fiesta'    => 'XV años, cumpleaños y celebraciones privadas',
+    'sala_exhibicion' => 'Expos, congresos y montajes de varios días',
+    'terraza'         => 'Cóctel de bienvenida, ceremonias al aire libre',
+    'jardin'          => 'Ceremonias, sesiones de foto y recepciones',
+];
+
+$estiloEspacio = [
+    'salon_gala'      => 'Amplio, techo alto, iluminación escénica',
+    'salon_fiesta'    => 'Cálido, íntimo, pista central',
+    'sala_exhibicion' => 'Diáfano, modular, carga y descarga directa',
+    'terraza'         => 'Abierto, vista panorámica, toldo retráctil',
+    'jardin'          => 'Natural, arbolado, iluminación colgante',
+];
 ?>
-<nav class="site-nav" aria-label="Navegación principal">
-    <div class="l-container site-nav__inner">
-        <a class="marca-landing" href="<?= e(url('/')) ?>">
-            <span class="monograma">CE</span>
-            <span>
-                <b>ConectaEventos</b>
-                <span>Recinto &amp; productora</span>
-            </span>
+
+<!-- =====================================================================
+     Navegacion
+     ===================================================================== -->
+<header class="l-nav">
+    <div class="l-nav__caja">
+        <a class="l-marca" href="<?= e(url('/')) ?>" aria-label="ConectaEventos, inicio">
+            <span class="l-marca__sello">CE</span>
+            <span>ConectaEventos</span>
         </a>
 
-        <div class="site-nav__links">
-            <a href="#recinto">Recinto</a>
-            <a href="#modulos">Cómo funciona</a>
-            <a href="#disponibilidad">Disponibilidad</a>
-            <a href="#galeria">Eventos</a>
-            <a href="#contacto">Contacto</a>
-        </div>
+        <nav class="l-menu" aria-label="Secciones del sitio">
+            <a href="#recinto">El recinto</a>
+            <a href="#celebraciones">Celebraciones</a>
+            <a href="#espacios">Espacios</a>
+            <a href="#agenda">Agenda</a>
+            <a href="<?= e(url('/boda')) ?>">Historias</a>
+        </nav>
 
-        <div class="site-nav__cta">
-            <a class="btn btn--fantasma btn--sm" href="<?= e(url('/boda')) ?>"><?= icono('corazon') ?> Bodas</a>
-            <a class="btn btn--lima btn--sm" href="<?= e(url('/login')) ?>"><?= icono('llave') ?> Entrar</a>
-        </div>
-
-        <button type="button" class="site-nav__toggle" aria-label="Abrir menú" aria-expanded="false">
-            <?= icono('menu') ?>
-        </button>
-    </div>
-</nav>
-
-<header class="hero" id="recinto">
-    <div class="hero__fondo">
-        <img src="<?= e($foto(2306281, 1800)) ?>" alt="Salón de eventos iluminado durante una recepción" fetchpriority="high">
-    </div>
-    <div class="hero__rejilla" aria-hidden="true"></div>
-
-    <div class="l-container hero__inner">
-        <div>
-            <p class="eyebrow">Ciudad de México · Desde 2014</p>
-            <h1>Eventos que se recuerdan.<br>Operación que <span class="resalte">no falla.</span></h1>
-            <p class="hero__texto">
-                Un recinto, cuatro módulos y una sola base de datos. Clientes, espacios, cocina,
-                cotizaciones y cobranza trabajan coordinados para que el día del evento solo tengas
-                que recibir a tus invitados.
-            </p>
-            <div class="hero__cta">
-                <a class="btn btn--lima" href="#contacto"><?= icono('calendario') ?> Agendar una visita</a>
-                <a class="btn btn--fantasma" href="#disponibilidad"><?= icono('ver') ?> Ver disponibilidad</a>
-            </div>
-            <div class="hero__prueba">
-                <div class="avatares" aria-hidden="true">
-                    <span>AL</span><span>MV</span><span>DS</span><span>+8</span>
-                </div>
-                <p><b><?= e(plural((int) $stats['eventos'], 'evento cerrado', 'eventos cerrados')) ?></b><br>con expediente completo y auditoría</p>
-            </div>
-        </div>
-
-        <aside class="hero__panel" aria-label="Disponibilidad del mes">
-            <div class="panel-dispo">
-                <div class="panel-dispo__head">
-                    <span class="punto" aria-hidden="true"></span>
-                    <b>Disponibilidad en vivo</b>
-                    <span><?= e($calendario['etiqueta']) ?></span>
-                </div>
-                <div class="panel-dispo__cuerpo">
-                    <div class="mini-cal">
-                        <?php foreach (['L', 'M', 'M', 'J', 'V', 'S', 'D'] as $dia): ?>
-                            <div class="mini-cal__dia"><?= e($dia) ?></div>
-                        <?php endforeach; ?>
-                        <?php foreach ($calendario['celdas'] as $celda): ?>
-                            <?php if ($celda['dia'] === null): ?>
-                                <div class="mini-cal__celda" aria-hidden="true"></div>
-                            <?php else: ?>
-                                <div class="mini-cal__celda <?= $celda['hoy'] ? 'hoy' : ($celda['ocupado'] ? 'ocupado' : 'libres') ?>"
-                                     title="<?= $celda['ocupado'] ? e('Ocupado: ' . $celda['evento']) : 'Disponible' ?>">
-                                    <?= (int) $celda['dia'] ?>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <div class="panel-dispo__lista">
-                        <div class="panel-fila">
-                            <?= icono('espacios') ?>
-                            <b>Espacios activos</b>
-                            <span><?= count($espacios) ?> recintos</span>
-                        </div>
-                        <div class="panel-fila">
-                            <?= icono('invitados') ?>
-                            <b>Aforo máximo</b>
-                            <span><?= number_format((int) $stats['aforo'], 0, '.', ',') ?> personas</span>
-                        </div>
-                        <div class="panel-fila">
-                            <?= icono('calendario') ?>
-                            <b>Días ocupados</b>
-                            <span><?= (int) $calendario['ocupados'] ?> este mes</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-dispo__pie">
-                    <?= icono('check') ?> Calculado con reservas confirmadas, no con promesas.
-                </div>
-            </div>
-        </aside>
-    </div>
-
-    <div class="hero__marquesina" aria-hidden="true">
-        <div class="marquesina">
-            <?php for ($i = 0; $i < 2; $i++): ?>
-                <span class="marquesina__item">Bodas de autor</span>
-                <span class="marquesina__item">Congresos</span>
-                <span class="marquesina__item">Cenas corporativas</span>
-                <span class="marquesina__item">Exposiciones</span>
-                <span class="marquesina__item">XV años</span>
-                <span class="marquesina__item">Graduaciones</span>
-                <span class="marquesina__item">Conciertos privados</span>
-            <?php endfor; ?>
+        <div class="l-nav__acciones">
+            <button class="l-nav__hamburguesa" type="button" aria-expanded="false" aria-label="Abrir el menú">
+                <?= icono('menu') ?>
+            </button>
+            <a class="l-nav__btn" href="#contacto">
+                <span>Agendar visita</span>
+                <span class="l-nav__flecha"><?= icono('flecha') ?></span>
+            </a>
         </div>
     </div>
 </header>
 
-<section class="seccion seccion--compacta">
-    <div class="l-container">
-        <div class="tira reveal">
-            <div class="tira__item">
-                <b data-contador="<?= (int) $stats['eventos'] ?>" data-sufijo="+"><?= (int) $stats['eventos'] ?>+</b>
-                <span>Eventos realizados</span>
-            </div>
-            <div class="tira__item">
-                <b data-contador="<?= (int) $stats['clientes'] ?>"><?= (int) $stats['clientes'] ?></b>
-                <span>Clientes en expediente</span>
-            </div>
-            <div class="tira__item">
-                <b data-contador="<?= (int) $stats['espacios'] ?>"><?= (int) $stats['espacios'] ?></b>
-                <span>Espacios y terrazas</span>
-            </div>
-            <div class="tira__item">
-                <b data-contador="<?= (int) $stats['proveedores'] ?>"><?= (int) $stats['proveedores'] ?></b>
-                <span>Proveedores homologados</span>
-            </div>
+<!-- =====================================================================
+     Heroe
+     ===================================================================== -->
+<section class="l-hero">
+    <div class="l-hero__foto" style="background-image:url('<?= e(foto('portada', 1800)) ?>')"></div>
+    <div class="l-hero__velo"></div>
+
+    <div class="l-hero__caja">
+        <span class="l-eyebrow l-eyebrow--claro">Bodas · Corporativo · Congresos · Graduaciones · Conciertos</span>
+        <h1 class="l-display l-parte">Un recinto para cada celebración</h1>
+        <div class="l-hero__acciones">
+            <a class="l-btn l-btn--crema" href="#contacto"><?= icono('calendario') ?> Agendar una visita</a>
+            <a class="l-btn l-btn--fantasma" href="#espacios">Conocer los espacios</a>
         </div>
+    </div>
+
+    <div class="l-hero__abajo" aria-hidden="true">
+        <span class="l-hero__raton"></span>
+        Desliza
     </div>
 </section>
 
-<section class="seccion" id="modulos">
-    <div class="l-container">
-        <div class="seccion__cabeza reveal">
-            <div>
-                <p class="eyebrow eyebrow--oscuro">Un sistema, cuatro módulos</p>
-                <h2>Del primer correo<br>al último pago.</h2>
-            </div>
-            <div class="seccion__texto">
-                <p>No son cuatro sistemas pegados con copiar y pegar. Es un solo flujo donde cada área ve la información que necesita y nada más.</p>
-                <p>Cuando un evento se confirma, el espacio se bloquea, la cocina recibe la producción y finanzas sabe exactamente cuánto falta cobrar.</p>
-            </div>
-        </div>
+<div class="l-sobre-hero">
 
-        <div class="modulos reveal">
-            <article class="modulo">
-                <span class="modulo__num">Módulo A</span>
-                <div class="modulo__icono"><?= icono('clientes') ?></div>
-                <h3>Clientes y eventos</h3>
-                <p>Expediente único por cliente, eventos con aforo, tipo, estado y bitácora de cada cambio. Sin duplicados ni versiones huérfanas.</p>
-                <div class="modulo__pie"><?= icono('flecha') ?> Contacto → evento → cierre</div>
-            </article>
-            <article class="modulo modulo--destacado">
-                <span class="modulo__num">Módulo B</span>
-                <div class="modulo__icono"><?= icono('espacios') ?></div>
-                <h3>Recursos y reservas</h3>
-                <p>Espacios, mobiliario y equipos con control de traslapes. La disponibilidad se calcula por día y por cantidad, no por intuición.</p>
-                <div class="modulo__pie"><?= icono('check') ?> Cero dobles reservas</div>
-            </article>
-            <article class="modulo">
-                <span class="modulo__num">Módulo C</span>
-                <div class="modulo__icono"><?= icono('cotizacion') ?></div>
-                <h3>Cotizaciones y pagos</h3>
-                <p>Precios congelados al aceptar, anticipos, abonos y devoluciones. El saldo se calcula con pagos aplicados, nunca a mano.</p>
-                <div class="modulo__pie"><?= icono('flecha') ?> Propuesta → aceptación → cobranza</div>
-            </article>
-            <article class="modulo">
-                <span class="modulo__num">Módulo D</span>
-                <div class="modulo__icono"><?= icono('reportes') ?></div>
-                <h3>Auditoría y reportes</h3>
-                <p>Bitácora inmutable, control de inconsistencias y reportes de ocupación, producción y cobranza para decidir con datos.</p>
-                <div class="modulo__pie"><?= icono('flecha') ?> Todo queda registrado</div>
-            </article>
-        </div>
-    </div>
-</section>
-
-<section class="seccion seccion--compacta" id="disponibilidad">
-    <div class="l-container">
-        <div class="split">
-            <div class="split__texto reveal">
-                <p class="eyebrow eyebrow--oscuro">Disponibilidad real</p>
-                <h2>La fecha que ves libre,<br>de verdad lo está.</h2>
-                <p>El calendario público se alimenta de las reservas confirmadas del sistema. Si un espacio está apartado para montaje o mantenimiento, no aparece disponible.</p>
-                <ul class="lista-check">
-                    <li><span class="marca"><?= icono('check') ?></span><span><b>Bloqueo por día completo:</b> montaje, evento y desmontaje quedan reservados.</span></li>
-                    <li><span class="marca"><?= icono('check') ?></span><span><b>Control de inventario:</b> sillas, mesas, audio e iluminación se descuentan por cantidad.</span></li>
-                    <li><span class="marca"><?= icono('check') ?></span><span><b>Sin sobreventa:</b> el sistema rechaza traslapes aunque dos personas capturen a la vez.</span></li>
-                </ul>
-                <div class="hero__cta" style="margin-top:26px">
-                    <a class="btn btn--primario" href="#contacto"><?= icono('correo') ?> Consultar una fecha</a>
-                    <a class="btn btn--fantasma" href="<?= e(url('/login')) ?>"><?= icono('llave') ?> Ver panel</a>
-                </div>
+    <!-- =================================================================
+         Declaracion de apertura
+         ================================================================= -->
+    <section class="l-seccion" id="recinto">
+        <div class="l-ancho l-intro">
+            <div class="l-reveal">
+                <span class="l-eyebrow">El recinto</span>
+                <h2 class="l-h3" style="margin-top:16px">Cuatro espacios, un mismo estándar</h2>
             </div>
+            <div class="l-intro__texto l-reveal" style="--l-retraso:120ms">
+                <p class="l-lead">Llevamos la operacion completa de cada evento en un solo sistema: la
+                    disponibilidad del espacio, el inventario, el menú, la cotización y la cobranza.
+                    Nadie reserva dos veces el mismo salón ni descubre un faltante la noche del montaje.</p>
+                <p>Trabajamos igual de bien una boda de doscientos invitados que un congreso de tres días
+                    o un concierto con acceso general. Cambia el montaje, no el cuidado.</p>
 
-            <div class="mock reveal">
-                <div class="mock__tarjeta">
-                    <div class="mock__barra">
-                        <i></i><i></i><i></i>
-                        <span>Calendario operativo · <?= e($calendario['etiqueta']) ?></span>
+                <div class="l-intro__cifras">
+                    <div class="l-cifra">
+                        <b data-contador="<?= (int) $stats['eventos'] ?>" data-sufijo="+">0</b>
+                        <span>Eventos realizados</span>
                     </div>
-                    <div class="mock__cuerpo">
-                        <div class="mock__titulo">
-                            <b>Ocupación del recinto</b>
-                            <span><?= (int) $calendario['ocupados'] ?> días con evento</span>
+                    <div class="l-cifra">
+                        <b data-contador="<?= (int) $stats['aforo'] ?>">0</b>
+                        <span>Invitados en el salón mayor</span>
+                    </div>
+                    <div class="l-cifra">
+                        <b data-contador="<?= (int) $stats['espacios'] ?>">0</b>
+                        <span>Espacios disponibles</span>
+                    </div>
+                    <div class="l-cifra">
+                        <b data-contador="<?= (int) $stats['proveedores'] ?>">0</b>
+                        <span>Proveedores aliados</span>
+                    </div>
+                </div>
+
+                <p style="margin-top:28px">
+                    <a class="l-link" href="#espacios">Ver los espacios <?= icono('flecha') ?></a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- =================================================================
+         Collage con parallax
+         ================================================================= -->
+    <section class="l-seccion l-seccion--apretada">
+        <div class="l-ancho l-collage">
+            <?php
+            $collage = [
+                ['collage-1', 'Montaje de banquete con mantel largo', '.18'],
+                ['collage-2', 'Mesa decorada con flores y luces colgantes', '-.24'],
+                ['collage-3', 'Celebración al aire libre', '.12'],
+                ['collage-4', 'Reunión corporativa en sala de juntas', '-.16'],
+                ['collage-5', 'Juegos de luces sobre el escenario', '.22'],
+                ['collage-6', 'Pareja en una ceremonia al atardecer', '-.10'],
+            ];
+            foreach ($collage as [$clave, $alt, $fuerza]): ?>
+                <figure class="l-collage__pieza" data-par="<?= e($fuerza) ?>">
+                    <img src="<?= e(foto($clave, 900)) ?>" alt="<?= e($alt) ?>" loading="lazy" decoding="async">
+                </figure>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- =================================================================
+         Tipos de evento: la baraja
+         ================================================================= -->
+    <section class="l-baraja" id="celebraciones">
+        <div class="l-baraja__pista">
+            <div class="l-baraja__fijo l-seccion--menta">
+                <div class="l-cabeza l-ancho l-reveal" style="margin-bottom:0">
+                    <span class="l-eyebrow">Lo que celebramos</span>
+                    <h2 class="l-h2 l-parte" style="margin-top:14px">Toda ocasión cabe aquí</h2>
+                    <p>Desde una ceremonia intima hasta un congreso de tres días. Cada tipo de evento
+                        tiene su propio protocolo de montaje, menú y aforo.</p>
+                </div>
+
+                <div class="l-baraja__cartas" tabindex="0" role="group" aria-label="Tipos de evento que organizamos">
+                    <?php foreach ($tipos as $i => $tipo): ?>
+                        <article class="l-carta">
+                            <div class="l-carta__top">
+                                <b><?= e($tipo['nombre']) ?></b>
+                                <span class="l-carta__icono"><?= icono($tipo['icono'] ?: tipo_evento_icono($tipo['nombre'])) ?></span>
+                            </div>
+                            <div class="l-carta__foto">
+                                <img src="<?= e(foto_tipo($tipo['nombre'], 560)) ?>"
+                                     alt="<?= e($tipo['nombre']) ?>" loading="lazy" decoding="async">
+                            </div>
+                            <p><?= e($tipo['descripcion'] ?: 'Montaje a medida según el protocolo del evento.') ?></p>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="l-baraja__barra" aria-hidden="true"><span></span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =================================================================
+         Espacios apilados
+         ================================================================= -->
+    <section class="l-seccion l-seccion--ink" id="espacios">
+        <div class="l-ancho">
+            <div class="l-cabeza l-reveal">
+                <span class="l-eyebrow l-eyebrow--claro">Los espacios</span>
+                <h2 class="l-h2 l-parte" style="margin-top:14px">Elige donde sucede</h2>
+                <p style="color:var(--sobre-ink-2)">Cuatro espacios con capacidades distintas. Se pueden
+                    combinar: cóctel en la terraza y cena en el salón, o registro en la galería y
+                    sesiones en el salón de gala.</p>
+            </div>
+
+            <div class="l-espacios">
+                <?php foreach ($espacios as $i => $espacio): ?>
+                    <?php $tipoEsp = (string) $espacio['tipo']; ?>
+                    <article class="l-espacio" style="--l-i:<?= (int) $i ?>">
+                        <div class="l-espacio__foto" style="background-image:url('<?= e(foto($tipoEsp, 1400)) ?>')"></div>
+                        <div class="l-espacio__velo"></div>
+                        <div class="l-espacio__ficha">
+                            <div>
+                                <span class="l-eyebrow"><?= e($etiquetasTipo[$tipoEsp] ?? 'Espacio') ?></span>
+                                <h3 style="margin-top:10px"><?= e($espacio['nombre']) ?></h3>
+                                <?php if (!empty($espacio['descripcion'])): ?>
+                                    <p style="margin-top:12px;font-size:.9375rem"><?= e($espacio['descripcion']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                            <dl class="l-espacio__datos">
+                                <div class="l-espacio__dato">
+                                    <dt>Aforo</dt>
+                                    <dd>Hasta <?= number_format((int) $espacio['capacidad']) ?> invitados</dd>
+                                </div>
+                                <div class="l-espacio__dato">
+                                    <dt>Ideal para</dt>
+                                    <dd><?= e($idealPara[$tipoEsp] ?? 'Eventos sociales y corporativos') ?></dd>
+                                </div>
+                                <div class="l-espacio__dato">
+                                    <dt>Estilo</dt>
+                                    <dd><?= e($estiloEspacio[$tipoEsp] ?? 'Montaje flexible') ?></dd>
+                                </div>
+                                <div class="l-espacio__dato">
+                                    <dt>Desde</dt>
+                                    <dd><?= e(money($espacio['costo_referencia'])) ?> por jornada</dd>
+                                </div>
+                            </dl>
                         </div>
-                        <div class="mock-cal">
-                            <?php foreach (['L', 'M', 'M', 'J', 'V', 'S', 'D'] as $dia): ?>
-                                <div class="mock-cal__d"><?= e($dia) ?></div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- =================================================================
+         Agenda y disponibilidad
+         ================================================================= -->
+    <section class="l-seccion" id="agenda">
+        <div class="l-ancho">
+            <div class="l-cabeza l-reveal">
+                <span class="l-eyebrow">Agenda abierta</span>
+                <h2 class="l-h2 l-parte" style="margin-top:14px">¿Qué día tienes en mente?</h2>
+                <p>La disponibilidad que ves es la real: sale de las reservas confirmadas del recinto,
+                    no de un calendario aparte.</p>
+            </div>
+
+            <div class="l-intro" style="--l-cols:1">
+                <div class="l-reveal">
+                    <div class="l-cal">
+                        <div class="l-cal__top">
+                            <b><?= e($calendario['etiqueta']) ?></b>
+                            <div class="l-cal__nav">
+                                <a href="<?= e(url('/?mes=' . $calendario['anterior'])) ?>#agenda" aria-label="Mes anterior"><?= icono('atras') ?></a>
+                                <a href="<?= e(url('/?mes=' . $calendario['siguiente'])) ?>#agenda" aria-label="Mes siguiente"><?= icono('flecha') ?></a>
+                            </div>
+                        </div>
+
+                        <div class="l-cal__rejilla" role="grid">
+                            <?php foreach (['Lun','Mar','Mie','Jue','Vie','Sab','Dom'] as $dow): ?>
+                                <div class="l-cal__dow"><?= e($dow) ?></div>
                             <?php endforeach; ?>
+
                             <?php foreach ($calendario['celdas'] as $celda): ?>
                                 <?php if ($celda['dia'] === null): ?>
-                                    <div class="mock-cal__c" aria-hidden="true"></div>
+                                    <div class="l-cal__dia l-cal__dia--fuera" aria-hidden="true"></div>
                                 <?php else: ?>
-                                    <div class="mock-cal__c <?= $celda['hoy'] ? 'sel' : ($celda['ocupado'] ? 'busy' : 'free') ?>">
+                                    <div class="l-cal__dia <?= $celda['ocupado'] ? 'l-cal__dia--ocupado' : 'l-cal__dia--libre' ?>"
+                                         <?= $celda['ocupado'] ? 'title="' . e('Reservado: ' . $celda['evento']) . '"' : 'title="Disponible"' ?>>
                                         <?= (int) $celda['dia'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
-                        <div class="mock__leyenda">
-                            <span><i class="f"></i>Disponible</span>
-                            <span><i class="b"></i>Ocupado</span>
-                            <span><i style="background:var(--l-ink)"></i>Hoy</span>
+
+                        <div class="l-cal__leyenda">
+                            <span><i class="l-cal__punto" style="background:var(--menta)"></i> Disponible</span>
+                            <span><i class="l-cal__punto" style="background:var(--ink)"></i> Reservado</span>
+                            <span><?= e(plural((int) $calendario['ocupados'], 'día reservado', 'días reservados')) ?> este mes</span>
                         </div>
                     </div>
                 </div>
-                <div class="mock__flotante">
-                    <span>Espacio más amplio</span>
-                    <b><?= e($espacios[0]['nombre'] ?? 'Gran Salón') ?></b>
-                    <small>Hasta <?= number_format((int) ($espacios[0]['capacidad'] ?? 0), 0, '.', ',') ?> personas · <?= count($espacios) ?> espacios activos</small>
+
+                <div class="l-reveal" style="--l-retraso:120ms">
+                    <h3 class="l-h4" style="margin-bottom:18px">Próximos eventos en el recinto</h3>
+                    <?php if ($proximos === []): ?>
+                        <p>Todavía no hay eventos confirmados en la agenda pública. Escríbenos y
+                            apartamos la fecha que necesitas.</p>
+                    <?php else: ?>
+                        <div class="l-agenda">
+                            <?php foreach ($proximos as $evento): ?>
+                                <div class="l-agenda__fila">
+                                    <div class="l-agenda__fecha">
+                                        <b><?= e(date('d', strtotime($evento['fecha_inicio']))) ?></b>
+                                        <span><?= e(fecha($evento['fecha_inicio'], 'M')) ?></span>
+                                    </div>
+                                    <div>
+                                        <div class="l-agenda__nombre"><?= e($evento['nombre']) ?></div>
+                                        <div class="l-agenda__meta">
+                                            <?= e($evento['tipo']) ?> ·
+                                            <?= e(plural((int) $evento['aforo_maximo'], 'invitado', 'invitados')) ?>
+                                        </div>
+                                    </div>
+                                    <div class="l-agenda__sitio"><?= e($evento['espacio'] ?: 'Por asignar') ?></div>
+                                    <span class="l-agenda__pill">Confirmado</span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="seccion seccion--oscura">
-    <div class="l-container">
-        <div class="seccion__cabeza reveal">
-            <div>
-                <p class="eyebrow">Cómo trabajamos</p>
-                <h2>Cuatro pasos,<br>cero sorpresas.</h2>
-            </div>
-            <div class="seccion__texto">
-                <p>El mismo proceso para una cena de 40 personas que para un congreso de 400. Lo que cambia es la escala, no el rigor.</p>
+    <!-- =================================================================
+         Aliados
+         ================================================================= -->
+    <section class="l-seccion l-seccion--apretada l-seccion--arena">
+        <div class="l-ancho" style="text-align:center;margin-bottom:34px">
+            <p class="l-reveal">Proveedores de confianza que trabajan con nosotros cada temporada</p>
+        </div>
+        <div class="l-marquesina">
+            <div class="l-marquesina__pista">
+                <?php foreach ($aliados as $aliado): ?>
+                    <div class="l-marquesina__item"><?= e($aliado) ?></div>
+                <?php endforeach; ?>
             </div>
         </div>
+    </section>
 
-        <div class="pasos reveal">
-            <article class="paso">
-                <span class="paso__num">01</span>
-                <h3>Diagnóstico</h3>
-                <p>Escuchamos objetivo, fecha, aforo y presupuesto. Revisamos disponibilidad real antes de prometer nada.</p>
-                <span class="paso__tiempo">Día 1</span>
-            </article>
-            <article class="paso">
-                <span class="paso__num">02</span>
-                <h3>Propuesta</h3>
-                <p>Cotización detallada por concepto, con menú, montaje, recursos y anticipo claramente desglosados.</p>
-                <span class="paso__tiempo">48 horas</span>
-            </article>
-            <article class="paso">
-                <span class="paso__num">03</span>
-                <h3>Producción</h3>
-                <p>El evento entra a preparación: reservas bloqueadas, menús cerrados, invitados confirmados y proveedores citados.</p>
-                <span class="paso__tiempo">Semanas previas</span>
-            </article>
-            <article class="paso">
-                <span class="paso__num">04</span>
-                <h3>Ejecución y cierre</h3>
-                <p>Check-in, montaje y operación en sitio. Al final, expediente, pagos conciliados y reporte de resultados.</p>
-                <span class="paso__tiempo">Día del evento</span>
-            </article>
-        </div>
-    </div>
-</section>
+    <!-- =================================================================
+         Contacto
+         ================================================================= -->
+    <section class="l-seccion" id="contacto">
+        <div class="l-ancho">
+            <div class="l-cta">
+                <div class="l-cta__foto" style="background-image:url('<?= e(foto('cta', 1600)) ?>')"></div>
+                <div class="l-cta__velo"></div>
+                <span class="l-eyebrow l-eyebrow--claro">Agenda una visita</span>
+                <h2 class="l-h3" style="margin-top:14px">Ven a ver el recinto</h2>
+                <p>Cuéntanos qué celebras y te respondemos con disponibilidad, aforo y un estimado
+                    en menos de 24 horas hábiles.</p>
+            </div>
 
-<section class="seccion" id="galeria">
-    <div class="l-container">
-        <div class="seccion__cabeza reveal">
-            <div>
-                <p class="eyebrow eyebrow--oscuro">En operación</p>
-                <h2>Lo que viene<br>en el recinto.</h2>
-            </div>
-            <div class="seccion__texto">
-                <p>Estos son eventos reales tomados del sistema, no fotos de catálogo. Cada uno tiene espacio, menú, invitados y cobranza en el mismo expediente.</p>
-            </div>
-        </div>
+            <div class="l-ancho--angosto" style="margin-top:-56px;position:relative;z-index:3">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(24px,3vw,40px);box-shadow:var(--shadow-lg)">
+                    <form class="l-form" method="post" action="<?= e(url('/contacto')) ?>" data-una-vez>
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="origen" value="corporativo">
+                        <?php /* Trampa de miel: oculta para las personas, visible
+                                 para los robots que rellenan todos los campos.
+                                 No es un campo real; si llega con contenido, el
+                                 envio se descarta en SitioController::contacto. */ ?>
+                        <div class="trampa" aria-hidden="true">
+                            <label for="sw-corp">No rellenar</label>
+                            <input id="sw-corp" type="text" name="sitio_web" tabindex="-1" autocomplete="off" value="">
+                        </div>
 
-        <?php if ($proximos === []): ?>
-            <div class="features reveal">
-                <article class="feature">
-                    <?= icono('calendario') ?>
-                    <h3>Agenda abierta</h3>
-                    <p>No hay eventos públicos próximos. Escríbenos para revisar fechas disponibles en el recinto.</p>
-                </article>
-            </div>
-        <?php else: ?>
-            <div class="galeria reveal">
-                <?php $primero = $proximos[0]; ?>
-                <article class="galeria__grande">
-                    <img src="<?= e($foto(1181406, 1400)) ?>" alt="Montaje de un evento corporativo" loading="lazy">
-                    <div class="galeria__info">
-                        <span><?= e($primero['tipo']) ?> · <?= e(fecha($primero['fecha_inicio'], 'd M Y')) ?></span>
-                        <b><?= e($primero['nombre']) ?></b>
-                        <p><?= e($primero['espacio'] ?? 'Espacio por asignar') ?> · <?= (int) $primero['aforo_maximo'] ?> personas</p>
-                    </div>
-                </article>
-                <div class="galeria__lado">
-                    <?php $lado = 0; ?>
-                    <?php foreach (array_slice($proximos, 1, 2) as $evento): ?>
-                        <article class="galeria__foto">
-                            <img src="<?= e($foto($lado === 0 ? 2774556 : 587741, 900)) ?>" alt="Detalle de montaje y ambientación" loading="lazy">
-                            <div class="galeria__info">
-                                <span><?= e($evento['tipo']) ?> · <?= e(fecha($evento['fecha_inicio'], 'd M')) ?></span>
-                                <b><?= e(recortar($evento['nombre'], 44)) ?></b>
-                                <p><?= e($evento['espacio'] ?? 'Espacio por asignar') ?></p>
+                        <div class="l-form__fila">
+                            <div class="l-campo<?= error_campo('nombre') ? ' l-campo--error' : '' ?>">
+                                <label for="nombre">Nombre completo</label>
+                                <input id="nombre" name="nombre" type="text" required maxlength="120" value="<?= viejo('nombre') ?>" placeholder="Cómo te llamas">
+                                <?php if ($m = error_campo('nombre')): ?><span class="l-campo__error"><?= e($m) ?></span><?php endif; ?>
                             </div>
-                        </article>
-                        <?php $lado++; ?>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endif; ?>
-    </div>
-</section>
+                            <div class="l-campo<?= error_campo('correo') ? ' l-campo--error' : '' ?>">
+                                <label for="correo">Correo</label>
+                                <input id="correo" name="correo" type="email" required maxlength="120" value="<?= viejo('correo') ?>" placeholder="tucorreo@ejemplo.com">
+                                <?php if ($m = error_campo('correo')): ?><span class="l-campo__error"><?= e($m) ?></span><?php endif; ?>
+                            </div>
+                        </div>
 
-<section class="seccion seccion--compacta">
-    <div class="l-container">
-        <div class="features reveal">
-            <article class="feature">
-                <?= icono('espacios') ?>
-                <h3>Cinco espacios versátiles</h3>
-                <p>Salón de gala, salón de fiestas, galería diáfana, terraza con vista y jardín con pérgola.</p>
-            </article>
-            <article class="feature">
-                <?= icono('cubiertos') ?>
-                <h3>Cocina propia</h3>
-                <p>Menús de tres a cinco tiempos, opciones vegetarianas, veganas y sin gluten con costo por persona claro.</p>
-            </article>
-            <article class="feature">
-                <?= icono('musica') ?>
-                <h3>Audio e iluminación</h3>
-                <p>Equipo profesional incluido en los paquetes de gala, con inventario controlado por evento.</p>
-            </article>
-            <article class="feature">
-                <?= icono('invitados') ?>
-                <h3>RSVP sin fricción</h3>
-                <p>Cada invitado recibe un enlace único para confirmar, elegir menú y declarar restricciones alimenticias.</p>
-            </article>
-            <article class="feature">
-                <?= icono('pagos') ?>
-                <h3>Cobranza transparente</h3>
-                <p>Anticipo, abonos y saldo visibles en todo momento. Recibos y devoluciones con rastro contable.</p>
-            </article>
-            <article class="feature">
-                <?= icono('bitacora') ?>
-                <h3>Expediente auditable</h3>
-                <p>Cada cambio de fecha, aforo o precio queda registrado con usuario, fecha y motivo.</p>
-            </article>
-        </div>
-    </div>
-</section>
+                        <div class="l-form__fila">
+                            <div class="l-campo">
+                                <label for="telefono">Teléfono</label>
+                                <input id="telefono" name="telefono" type="tel" maxlength="25" value="<?= viejo('telefono') ?>" placeholder="55 0000 0000">
+                            </div>
+                            <div class="l-campo">
+                                <label for="tipo_evento">Tipo de evento</label>
+                                <select id="tipo_evento" name="tipo_evento">
+                                    <option value="">Elige una opción</option>
+                                    <?php foreach ($tipos as $tipo): ?>
+                                        <option value="<?= e($tipo['nombre']) ?>"><?= e($tipo['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
 
-<section class="seccion seccion--oscura">
-    <div class="l-container">
-        <div class="cita reveal">
-            <p class="cita__texto">“Pasamos de tres hojas de cálculo y un grupo de WhatsApp a un solo panel. El día del evento <em>nadie llamó preguntando cuántas mesas faltaban.</em>”</p>
-            <div class="cita__autor">
-                <span class="tabla__avatar">MV</span>
-                <div style="text-align:left">
-                    <b>Mariana Vázquez</b>
-                    <span>Dirección de eventos · Grupo Altavista</span>
+                        <div class="l-form__fila">
+                            <div class="l-campo">
+                                <label for="fecha_estimada">Fecha estimada</label>
+                                <input id="fecha_estimada" name="fecha_estimada" type="date" data-desde-hoy value="<?= viejo('fecha_estimada') ?>">
+                            </div>
+                            <div class="l-campo">
+                                <label for="aforo">Invitados aproximados</label>
+                                <input id="aforo" name="aforo" type="number" min="1" max="5000" value="<?= viejo('aforo') ?>" placeholder="150">
+                            </div>
+                        </div>
+
+                        <div class="l-campo<?= error_campo('mensaje') ? ' l-campo--error' : '' ?>">
+                            <label for="mensaje">Cuéntanos un poco más</label>
+                            <textarea id="mensaje" name="mensaje" maxlength="1000" placeholder="Qué celebras, qué montaje imaginas, si necesitas menú…"><?= viejo('mensaje') ?></textarea>
+                            <?php if ($m = error_campo('mensaje')): ?><span class="l-campo__error"><?= e($m) ?></span><?php endif; ?>
+                        </div>
+
+                        <button class="l-btn l-btn--ink" type="submit" style="justify-self:start">
+                            Enviar solicitud <?= icono('flecha') ?>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="seccion" id="contacto">
-    <div class="l-container">
-        <div class="split">
-            <div class="split__texto reveal">
-                <p class="eyebrow eyebrow--oscuro">Hablemos de tu evento</p>
-                <h2>Cuéntanos la fecha.<br>Nosotros ponemos el resto.</h2>
-                <p>Déjanos tus datos y te contactamos en menos de 24 horas hábiles con disponibilidad, propuesta de espacio y un estimado de menú.</p>
-
-                <ul class="lista-check">
-                    <li><span class="marca"><?= icono('ubicacion') ?></span><span><b>Recinto:</b> Av. de los Insurgentes Sur 1842, CDMX.</span></li>
-                    <li><span class="marca"><?= icono('telefono') ?></span><span><b>Teléfono:</b> +52 55 4821 9060 · lun a vie, 9:00 a 19:00 h.</span></li>
-                    <li><span class="marca"><?= icono('correo') ?></span><span><b>Correo:</b> hola@conectaeventos.mx</span></li>
-                </ul>
-
-                <div class="cta-final" style="margin-top:32px;padding:30px;grid-template-columns:1fr">
-                    <div>
-                        <h2 style="font-size:24px">¿Es una boda?</h2>
-                        <p style="margin-top:8px">Tenemos un sitio aparte, con menús de autor, espacios íntimos y RSVP para tus invitados.</p>
-                        <a class="btn btn--primario mt-3" href="<?= e(url('/boda')) ?>"><?= icono('corazon') ?> Ir a bodas</a>
+    <!-- =================================================================
+         Pie
+         ================================================================= -->
+    <footer class="l-pie">
+        <div class="l-ancho">
+            <div class="l-pie__top">
+                <div>
+                    <h2 class="l-parte">De nuestro recinto a tu celebración</h2>
+                    <div class="l-pie__chips">
+                        <a href="#recinto">El recinto</a>
+                        <a href="#celebraciones">Celebraciones</a>
+                        <a href="#espacios">Espacios</a>
+                        <a href="#agenda">Agenda</a>
+                        <a href="<?= e(url('/boda')) ?>">Historias</a>
                     </div>
+                </div>
+
+                <div class="l-pie__col">
+                    <h4>El sistema</h4>
+                    <a href="<?= e(url('/login')) ?>">Acceso al panel</a>
+                    <a href="<?= e(url('/salud')) ?>">Estado del servicio</a>
+                    <a href="<?= e(url('/sitio/disponibilidad')) ?>">Disponibilidad (API)</a>
+                </div>
+
+                <div class="l-pie__col">
+                    <h4>Contacto</h4>
+                    <p>Av. de los Recintos 128<br>Ciudad de México</p>
+                    <p>55 1234 5678</p>
+                    <a href="mailto:hola@conectaeventos.mx">hola@conectaeventos.mx</a>
+                </div>
+
+                <div class="l-pie__col">
+                    <h4>Horario</h4>
+                    <p>Visitas al recinto<br>Lunes a sábado, 10:00 a 19:00</p>
+                    <p>Eventos<br>Todos los días</p>
                 </div>
             </div>
 
-            <div class="reveal">
-                <form class="card formulario" method="post" action="<?= e(url('/contacto')) ?>" style="padding:26px">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="origen" value="corporativo">
-
-                    <div class="fila fila--entre">
-                        <div>
-                            <h2 style="font-size:19px">Solicitar información</h2>
-                            <p class="texto-muted texto-sm">Sin compromiso. Respuesta en un día hábil.</p>
-                        </div>
-                        <?= badge('Respuesta < 24 h', 'acento') ?>
-                    </div>
-
-                    <div class="campo-fila">
-                        <div class="campo<?= clase_error('nombre', $erroresForm) ?>">
-                            <label for="c-nombre">Nombre completo <span class="campo__req">*</span></label>
-                            <input class="input" id="c-nombre" name="nombre" type="text" required minlength="3" maxlength="120" value="<?= viejo('nombre') ?>" placeholder="Tu nombre">
-                            <?= error_de('nombre', $erroresForm) ?>
-                        </div>
-                        <div class="campo<?= clase_error('correo', $erroresForm) ?>">
-                            <label for="c-correo">Correo <span class="campo__req">*</span></label>
-                            <input class="input" id="c-correo" name="correo" type="email" required maxlength="120" value="<?= viejo('correo') ?>" placeholder="tu@empresa.mx">
-                            <?= error_de('correo', $erroresForm) ?>
-                        </div>
-                    </div>
-
-                    <div class="campo-fila">
-                        <div class="campo">
-                            <label for="c-telefono">Teléfono</label>
-                            <input class="input" id="c-telefono" name="telefono" type="tel" maxlength="25" value="<?= viejo('telefono') ?>" placeholder="+52 55 0000 0000">
-                        </div>
-                        <div class="campo">
-                            <label for="c-tipo">Tipo de evento</label>
-                            <select class="select" id="c-tipo" name="tipo_evento">
-                                <option value="">Selecciona una opción</option>
-                                <?php foreach ($tipos as $tipo): ?>
-                                    <option value="<?= e($tipo) ?>" <?= viejo('tipo_evento') === $tipo ? 'selected' : '' ?>><?= e($tipo) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="campo-fila">
-                        <div class="campo">
-                            <label for="c-fecha">Fecha estimada</label>
-                            <input class="input" id="c-fecha" name="fecha_estimada" type="date" data-futuro value="<?= viejo('fecha_estimada') ?>">
-                        </div>
-                        <div class="campo">
-                            <label for="c-aforo">Invitados estimados</label>
-                            <input class="input" id="c-aforo" name="aforo" type="number" min="1" max="2000" value="<?= viejo('aforo') ?>" placeholder="120">
-                        </div>
-                    </div>
-
-                    <div class="campo<?= clase_error('mensaje', $erroresForm) ?>">
-                        <label for="c-mensaje">Cuéntanos más</label>
-                        <textarea class="textarea" id="c-mensaje" name="mensaje" maxlength="1000" placeholder="Objetivo del evento, horario, requerimientos especiales…"><?= viejo('mensaje') ?></textarea>
-                        <span class="campo__ayuda">Máximo 1000 caracteres.</span>
-                        <?= error_de('mensaje', $erroresForm) ?>
-                    </div>
-
-                    <button class="btn btn--lima btn--bloque" type="submit"><?= icono('correo') ?> Enviar solicitud</button>
-                    <p class="texto-muted texto-xs">Al enviar aceptas que te contactemos por correo o teléfono. No compartimos tus datos con terceros.</p>
-                </form>
+            <div class="l-pie__legal">
+                <span>© <?= date('Y') ?> ConectaEventos. Proyecto académico.</span>
+                <span>Operación Caos Digital · Módulos A, B, C y D</span>
             </div>
         </div>
-    </div>
-</section>
 
-<section class="seccion seccion--compacta">
-    <div class="l-container">
-        <div class="cta-final reveal">
-            <div>
-                <p class="eyebrow eyebrow--oscuro">Agenda 2026–<?= $anioActual + 1 ?></p>
-                <h2>Las mejores fechas se apartan con tiempo.</h2>
-                <p>Consulta disponibilidad real y recibe una propuesta con menú, montaje y anticipo desglosado.</p>
-            </div>
-            <div class="cta-final__acciones">
-                <a class="btn btn--primario" href="#contacto"><?= icono('calendario') ?> Agendar visita</a>
-                <a class="btn btn--claro" href="<?= e(url('/boda')) ?>"><?= icono('corazon') ?> Ver bodas</a>
-            </div>
-        </div>
-    </div>
-</section>
+        <div class="l-pie__firma" aria-hidden="true">Celebrar bien</div>
+    </footer>
 
-<footer class="pie">
-    <div class="l-container">
-        <div class="pie__grid">
-            <div class="pie__marca">
-                <a class="marca-landing" href="<?= e(url('/')) ?>">
-                    <span class="monograma" style="background:var(--l-lime);color:var(--l-ink)">CE</span>
-                    <span>
-                        <b>ConectaEventos</b>
-                        <span>Recinto &amp; productora</span>
-                    </span>
-                </a>
-                <p>Un recinto en el sur de la Ciudad de México para eventos corporativos, sociales y bodas de autor. Operación propia, cocina propia, expediente propio.</p>
-            </div>
-            <div class="pie__col">
-                <h4>Recinto</h4>
-                <a href="#recinto">Espacios</a>
-                <a href="#disponibilidad">Disponibilidad</a>
-                <a href="#galeria">Eventos</a>
-                <a href="#contacto">Visitas</a>
-            </div>
-            <div class="pie__col">
-                <h4>Servicios</h4>
-                <a href="#modulos">Corporativo</a>
-                <a href="#modulos">Social</a>
-                <a href="<?= e(url('/boda')) ?>">Bodas</a>
-                <a href="<?= e(url('/rsvp')) ?>">Confirmar asistencia</a>
-            </div>
-            <div class="pie__col">
-                <h4>Contacto</h4>
-                <a href="tel:+525548219060">+52 55 4821 9060</a>
-                <a href="mailto:hola@conectaeventos.mx">hola@conectaeventos.mx</a>
-                <a href="<?= e(url('/login')) ?>">Acceso al panel</a>
-                <a href="<?= e(url('/salud')) ?>">Estado del sistema</a>
-            </div>
-        </div>
-        <div class="pie__base">
-            <span>© <?= $anioActual ?> ConectaEventos · Todos los derechos reservados</span>
-            <span>Av. de los Insurgentes Sur 1842, CDMX · Aviso de privacidad</span>
-        </div>
-    </div>
-</footer>
+</div>

@@ -111,9 +111,9 @@ $id = (int) $evento['id_evento'];
                     <div class="timeline">
                         <?php foreach ($bitacora as $movimiento): ?>
                             <div class="timeline__item">
-                                <span class="timeline__punto"><?= icono('destello') ?></span>
+                                <span class="timeline__punto"><?= icono(accion_icono((string) $movimiento['accion'])) ?></span>
                                 <div class="timeline__cuerpo">
-                                    <b><?= e(str_replace('_', ' ', $movimiento['accion'])) ?></b>
+                                    <b><?= e(accion_legible((string) $movimiento['accion'])) ?></b>
                                     <span><?= e($movimiento['usuario'] ?? 'Sistema') ?> · <?= e(fecha_hora($movimiento['fecha'])) ?></span>
                                     <?php if (($movimiento['detalle'] ?? '') !== ''): ?>
                                         <p><?= e(recortar($movimiento['detalle'], 120)) ?></p>

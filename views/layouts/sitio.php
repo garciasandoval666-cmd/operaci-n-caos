@@ -12,7 +12,7 @@ $titulo = $titulo ?? 'Sitio';
     <meta name="description" content="ConectaEventos · recinto y productora de eventos corporativos, sociales y de bodas en Ciudad de México.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= e(asset('assets/css/app.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset('assets/css/landing.css')) ?>">
 </head>

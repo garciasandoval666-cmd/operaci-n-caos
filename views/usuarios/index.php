@@ -158,8 +158,8 @@
                                 </div>
                                 <div class="campo">
                                     <label for="clave-<?= (int) $filaUsuario['id_usuario'] ?>">Nueva contraseña</label>
-                                    <input class="input" id="clave-<?= (int) $filaUsuario['id_usuario'] ?>" name="clave" type="password" minlength="8" autocomplete="new-password" placeholder="Dejar vacío para conservar la actual">
-                                    <span class="campo__ayuda">Mínimo 8 caracteres. Compártela por un canal seguro y pide cambiarla al primer ingreso.</span>
+                                    <input class="input" id="clave-<?= (int) $filaUsuario['id_usuario'] ?>" name="clave" type="password" minlength="10" autocomplete="new-password" placeholder="Dejar vacío para conservar la actual">
+                                    <span class="campo__ayuda">Mínimo 10 caracteres. Compártela por un canal seguro y pide cambiarla al primer ingreso.</span>
                                 </div>
                                 <label class="campo-check">
                                     <input type="checkbox" name="activo" value="1" <?= (int) $filaUsuario['activo'] === 1 ? 'checked' : '' ?>>
@@ -212,8 +212,8 @@
                 </div>
                 <div class="campo">
                     <label for="nuevo-clave">Contraseña temporal <span class="campo__req">*</span></label>
-                    <input class="input" id="nuevo-clave" name="clave" type="password" required minlength="8" autocomplete="new-password">
-                    <span class="campo__ayuda">Mínimo 8 caracteres. No se guarda en texto plano.</span>
+                    <input class="input" id="nuevo-clave" name="clave" type="password" required minlength="10" autocomplete="new-password">
+                    <span class="campo__ayuda">Mínimo 10 caracteres. No se guarda en texto plano.</span>
                 </div>
                 <button class="btn btn--lima btn--bloque" type="submit"><?= icono('mas') ?> Crear usuario</button>
             </form>

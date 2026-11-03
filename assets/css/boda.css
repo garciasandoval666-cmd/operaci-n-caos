@@ -1,0 +1,198 @@
+/* ==========================================================================
+   ConectaEventos - paginas de invitacion (RSVP)
+   --------------------------------------------------------------------------
+   El sitio publico tiene una sola identidad, la que vive en landing.css. Esta
+   hoja no es una segunda identidad: cubre las dos pantallas de invitacion,
+   que son un flujo aparte (se abren desde un enlace con token, sin navegacion
+   ni pie) y por eso tienen su propio esqueleto a dos columnas.
+
+   Conserva el prefijo `b-` porque es el que usa el marcado, que esta cubierto
+   por la matriz de pruebas y no conviene tocar por un cambio de nombre. Todo
+   lo visual sale de los tokens de app.css.
+   ========================================================================== */
+
+body.boda {
+  background: var(--marfil);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+}
+body.boda::before { display: none; }
+
+body.boda h1, body.boda h2, body.boda h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -.025em;
+  line-height: 1.1;
+  margin: 0;
+}
+body.boda h1 { font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 700; }
+body.boda h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 600; }
+body.boda p { margin: 0; }
+body.boda a { color: inherit; }
+
+.mt-2 { margin-top: 12px; }
+.mt-3 { margin-top: 20px; }
+.mb-2 { margin-bottom: 12px; }
+.b-2 { margin-bottom: 12px; }
+
+/* --------------------------------------------------------------------------
+   Esqueleto a dos columnas
+   --------------------------------------------------------------------------
+   Fotografia a la izquierda, formulario a la derecha. Por debajo de 940px la
+   foto pasa a ser una banda superior: ocupa menos y deja el formulario arriba,
+   que es a lo que se viene.
+   -------------------------------------------------------------------------- */
+.b-rsvp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100svh; }
+
+.b-rsvp__visual { position: relative; overflow: hidden; background: var(--ink); }
+.b-rsvp__visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.b-rsvp__visual::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(9, 11, 15, .34) 0%, rgba(9, 11, 15, .22) 40%, rgba(9, 11, 15, .84) 100%);
+}
+.b-rsvp__leyenda {
+  position: absolute; inset: auto 0 0; z-index: 2;
+  padding: clamp(28px, 4vw, 52px);
+  color: #fff;
+}
+.b-rsvp__leyenda > span {
+  display: inline-block; margin-bottom: 14px;
+  font-size: .8125rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .84);
+}
+body.boda .b-rsvp__leyenda h2 { color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, .4); }
+.b-rsvp__leyenda p { margin-top: 14px; max-width: 42ch; color: rgba(255, 255, 255, .8); font-size: .9375rem; }
+
+.b-rsvp__panel { display: grid; place-items: center; padding: clamp(28px, 4vw, 64px) clamp(20px, 4vw, 56px); }
+.b-rsvp__caja { width: min(480px, 100%); display: grid; gap: 18px; }
+
+.b-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .8125rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted-2);
+  transition: color var(--t-rapido) var(--ease);
+}
+a.b-eyebrow:hover { color: var(--ink); }
+.b-eyebrow .icono { width: 15px; height: 15px; }
+.b-eyebrow--centro { justify-content: center; }
+
+.b-rsvp__pie { font-size: .8125rem; color: var(--muted-2); text-align: center; }
+.b-rsvp__pie a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Ficha del evento al que pertenece la invitacion */
+.b-rsvp__evento {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 18px; border-radius: var(--r);
+  background: var(--menta); color: var(--ink);
+}
+.b-rsvp__evento .icono { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+.b-rsvp__evento b { display: block; font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; }
+.b-rsvp__evento span { display: block; font-size: .875rem; color: var(--ink-4); margin-top: 3px; }
+
+/* --------------------------------------------------------------------------
+   Formulario
+   -------------------------------------------------------------------------- */
+.b-form { display: grid; gap: 16px; }
+.b-campo { display: grid; gap: 7px; }
+.b-campo > label { font-size: .8125rem; font-weight: 500; color: var(--ink); }
+.b-campo-fila { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+.b-input, .b-select {
+  width: 100%; min-height: 52px; padding: 13px 16px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--surface); font-size: .9375rem; color: var(--text);
+  transition: border-color var(--t-rapido) var(--ease), box-shadow var(--t-rapido) var(--ease);
+}
+.b-select {
+  appearance: none; padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23817e79' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.b-input:focus, .b-select:focus {
+  outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(9, 11, 15, .08);
+}
+
+/* Si / No como dos tarjetas seleccionables, no como radios sueltos. */
+.b-opciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.b-opcion { position: relative; display: block; cursor: pointer; }
+.b-opcion input {
+  position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer;
+}
+.b-opcion span {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 56px; padding: 0 16px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--surface); font-size: .9375rem; font-weight: 500; color: var(--muted);
+  transition: border-color var(--t-rapido) var(--ease), background var(--t-rapido) var(--ease), color var(--t-rapido) var(--ease);
+}
+.b-opcion span .icono { width: 17px; height: 17px; }
+.b-opcion:hover span { border-color: var(--muted-3); }
+/* El foco se dibuja en la tarjeta porque el radio real es invisible: sin
+   esto, quien navega con teclado no sabria donde esta. */
+.b-opcion input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.b-opcion input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.b-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 54px; padding: 0 28px;
+  border: 0; border-radius: var(--r-pill);
+  background: var(--ink); color: #fff;
+  font-family: var(--font-ui); font-size: .9375rem; font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-medio) var(--ease), transform var(--t-rapido) var(--ease), box-shadow var(--t-medio) var(--ease);
+}
+.b-btn:hover { background: var(--ink-3); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(9, 11, 15, .22); }
+.b-btn:active { transform: translateY(0); }
+.b-btn--bloque { width: 100%; }
+
+/* --------------------------------------------------------------------------
+   Avisos y resultado
+   -------------------------------------------------------------------------- */
+/* Bloque, no flex: el mensaje lleva <b> y nodos de texto sueltos, que como
+   items de flex se repartian en columnas y rompian la frase. El icono se saca
+   del flujo para conservar la sangria. */
+.b-aviso {
+  display: block; position: relative;
+  padding: 14px 16px 14px 45px; border-radius: var(--r-sm);
+  background: var(--arena); color: var(--ink-4);
+  font-size: .875rem; line-height: 1.5;
+}
+.b-aviso .icono { position: absolute; left: 16px; top: 15px; width: 18px; height: 18px; }
+.b-aviso--ok { background: var(--green-soft); color: var(--green); }
+.b-aviso--error { background: var(--red-soft); color: var(--red); }
+
+.b-resultado { display: grid; gap: 18px; justify-items: center; text-align: center; }
+.b-resultado__icono {
+  width: 76px; height: 76px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--menta); color: var(--acento);
+}
+.b-resultado__icono .icono { width: 32px; height: 32px; }
+
+.b-flash { position: fixed; top: 18px; right: 18px; left: 18px; z-index: 90; display: grid; gap: 10px; justify-items: center; }
+.b-flash .flash {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: var(--shadow-flota); font-size: .875rem; color: var(--text);
+  max-width: min(460px, 100%);
+}
+.b-flash .flash--ok { border-left: 3px solid var(--green); }
+.b-flash .flash--error { border-left: 3px solid var(--red); }
+.b-flash .flash-cerrar { background: none; border: 0; color: var(--muted-2); margin-left: auto; display: grid; place-items: center; cursor: pointer; }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 940px) {
+  .b-rsvp { grid-template-columns: 1fr; min-height: 0; }
+  .b-rsvp__visual { min-height: 46svh; }
+  .b-rsvp__panel { padding: clamp(24px, 6vw, 40px) 20px 48px; }
+}
+
+@media (max-width: 560px) {
+  .b-campo-fila, .b-opciones { grid-template-columns: 1fr; }
+  .b-rsvp__visual { min-height: 34svh; }
+}

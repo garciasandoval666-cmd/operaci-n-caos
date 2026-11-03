@@ -69,7 +69,7 @@ $maxUsuario = max(1, (int) ($usuarios[0]['total'] ?? 1));
                 <div class="distribucion-lista">
                     <?php foreach ($acciones as $accion): ?>
                         <div class="distribucion-lista__fila">
-                            <span title="<?= e($accion['accion']) ?>"><?= e(recortar($accion['accion'], 22)) ?></span>
+                            <span title="<?= e($accion['accion']) ?>"><?= e(recortar(accion_legible((string) $accion['accion']), 26)) ?></span>
                             <div class="progreso progreso--lima"><span style="width:<?= min(100, round(((int) $accion['total'] / $maxAccion) * 100)) ?>%"></span></div>
                             <b><?= (int) $accion['total'] ?></b>
                         </div>
