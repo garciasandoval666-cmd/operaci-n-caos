@@ -39,9 +39,9 @@ $puedeGestionar = puede(['administrador', 'comercial', 'finanzas']);
     <article class="doc">
         <div class="doc__head">
             <div class="doc__marca">
-                <span class="monograma">CE</span>
+                <span class="monograma"><?= logo() ?></span>
                 <div>
-                    <b>ConectaEventos</b>
+                    <b><?= e(marca()) ?></b>
                     <span>Recinto y productora de eventos</span>
                 </div>
             </div>
@@ -130,11 +130,11 @@ $puedeGestionar = puede(['administrador', 'comercial', 'finanzas']);
         </div>
 
         <div class="doc__firma">
-            <div>ConectaEventos · Coordinación</div>
+            <div><?= e(marca()) ?> · Coordinación</div>
             <div><?= e($cotizacion['cliente']) ?> · Cliente</div>
         </div>
 
-        <p class="aviso-print">Documento generado por ConectaEventos · <?= e(date('d/m/Y H:i')) ?> · <?= e($cotizacion['folio']) ?></p>
+        <p class="aviso-print">Documento generado por <?= e(marca()) ?> · <?= e(date('d/m/Y H:i')) ?> · <?= e($cotizacion['folio']) ?></p>
     </article>
 
     <div class="grid grid-2 mt-3 no-imprimir">

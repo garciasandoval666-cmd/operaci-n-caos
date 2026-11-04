@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Flor">
+  <rect width="64" height="64" rx="15" fill="#b4403a" fill-opacity=".12"/>
+  <g fill="none" stroke="#b4403a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 19c0 7 4 12 9 12s9-5 9-12c0 0-4.5 3.5-9 0-4.5 3.5-9 0-9 0z"/><path d="M32 31v15"/><path d="M32 40c-5.5 0-9-3.5-9-7 5.5 0 9 3.5 9 7z"/>
+  </g>
+</svg>

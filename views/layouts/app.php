@@ -11,7 +11,9 @@ $flash = $flash ?? '';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#090b0f">
-    <title><?= e($titulo) ?> · ConectaEventos</title>
+    <title><?= e($titulo) ?> · <?= e(marca()) ?></title>
+    <link rel="icon" href="<?= e(asset('assets/img/favicon.svg')) ?>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<?= e(asset('assets/img/favicon.svg')) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

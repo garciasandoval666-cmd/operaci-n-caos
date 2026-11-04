@@ -1,4 +1,4 @@
-# ConectaEventos
+# Solera
 
 Sistema web integral para la operación de un recinto y productora de eventos.
 Resuelve el escenario **«Operación Caos Digital»** unificando en una sola base de
@@ -21,6 +21,29 @@ evento del catálogo, no solo bodas:
   tipo. La ruta conserva el nombre porque hay enlaces publicados que apuntan ahí.
 - **`/rsvp`** · invitación personal por token: confirmación de asistencia, menú y
   restricciones alimenticias.
+
+## 0. El flujo, de principio a fin
+
+El sistema cubre el camino completo de un evento, sin saltos ni capturas
+duplicadas:
+
+```
+Sitio público                     Panel
+─────────────                     ─────
+Visitante rellena                 Solicitudes          ← bandeja con filtros
+el formulario      ──────────▶    (nuevo → contactado)
+     │                                  │
+     │ ve si su fecha                   │ «Convertir en evento»
+     │ está libre, en vivo              ▼
+     │                            Cliente + Evento + Reserva   ← una transacción
+     │                                  │
+     ▼                                  ▼
+  RSVP por token     ◀────────    Cotización → Pagos → Producción → Cierre
+```
+
+Las dos puntas se tocan: la disponibilidad que ve el visitante en el formulario
+es la misma que el equipo ve en el panel, porque sale de la misma tabla de
+reservas. Lo que se aparta para un evento deja de estar disponible para otro.
 
 ---
 
@@ -55,6 +78,34 @@ cp .env.example .env
 
 `.env` **no se versiona** (está en `.gitignore`). `.env.example` sirve como plantilla
 y no contiene credenciales reales.
+
+> La base se sigue llamando `conectaeventos` y la URL local sigue siendo
+> `/conectaeventos/`, aunque el recinto pase a llamarse **Solera**. Es
+> deliberado: renombrar una base en marcha obliga a tocar el `.env` de cada
+> persona del equipo y la configuración de Apache, y no aporta nada. El nombre
+> comercial vive en la tabla `configuracion`; el de la base es solo
+> infraestructura.
+
+Comprobado: una base creada así pasa las 31 pruebas de integración sin tocar nada
+más (`php tests/pruebas.php`).
+
+### 3.1 Si ya tenías la base importada
+
+`schema.sql` **recrea las tablas**, así que volver a importarlo borra lo que
+tengas dentro. Para actualizar una base existente a la versión 1.2.0 sin perder
+datos hay un script aparte:
+
+```bash
+mysql -u root -p conectaeventos < database/migracion-1.2.0.sql
+```
+
+Añade los campos de marca de los proveedores (`categoria`, `descripcion`,
+`sitio_web`, `color_marca`, `desde`), la ficha de los espacios (`ideal_para`,
+`estilo`), los cinco proveedores de servicio y su inventario. Va dentro de una
+transacción y es repetible: si ya se aplicó, no duplica nada.
+
+Sin esta migración, el código de la 1.2.0 falla contra una base antigua, porque
+consulta columnas que allí no existen.
 
 ## 4. Ejecución
 
@@ -110,14 +161,14 @@ esa ayuda no se imprime.
 
 | Correo | Rol | Puede hacer |
 | --- | --- | --- |
-| `admin@conectaeventos.mx` | Administrador | Todo, incluidos usuarios y configuración |
-| `comercial@conectaeventos.mx` | Comercial | Clientes, eventos, cotizaciones y pagos (lectura) |
-| `coordinacion@conectaeventos.mx` | Coordinador | Operación del evento, invitados, reservas, cancelaciones |
-| `banquetes@conectaeventos.mx` | Banquetes | Menús, producción, insumos y kardex |
-| `operaciones@conectaeventos.mx` | Operaciones | Espacios, recursos, proveedores y reservas |
-| `recepcion@conectaeventos.mx` | Recepción | Check-in y listas de asistencia |
-| `finanzas@conectaeventos.mx` | Finanzas | Pagos, saldos, reportes y exportación |
-| `auditoria@conectaeventos.mx` | Auditor | Bitácora, reportes y consistencia (solo lectura) |
+| `admin@solera.mx` | Administrador | Todo, incluidos usuarios y configuración |
+| `comercial@solera.mx` | Comercial | Clientes, eventos, cotizaciones y pagos (lectura) |
+| `coordinacion@solera.mx` | Coordinador | Operación del evento, invitados, reservas, cancelaciones |
+| `banquetes@solera.mx` | Banquetes | Menús, producción, insumos y kardex |
+| `operaciones@solera.mx` | Operaciones | Espacios, recursos, proveedores y reservas |
+| `recepcion@solera.mx` | Recepción | Check-in y listas de asistencia |
+| `finanzas@solera.mx` | Finanzas | Pagos, saldos, reportes y exportación |
+| `auditoria@solera.mx` | Auditor | Bitácora, reportes y consistencia (solo lectura) |
 
 > La contraseña demo se define en el seed como hash bcrypt; no se guarda en texto
 > plano. Para cambiarla, edita la cuenta desde **Usuarios** o regenera el hash con

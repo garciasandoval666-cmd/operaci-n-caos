@@ -1,5 +1,5 @@
 -- ============================================================
---  ConectaEventos · esquema de base de datos
+--  Solera · esquema de base de datos
 --  MySQL 8.0+ / MariaDB 10.4+
 --  Operación Caos Digital · módulos A, B, C y D integrados
 -- ============================================================
@@ -302,18 +302,37 @@ CREATE TABLE espacios (
   capacidad    INT NOT NULL,
   costo_referencia DECIMAL(10,2) NOT NULL DEFAULT 0,
   descripcion  VARCHAR(255),
+  -- Lo que el sitio publico cuenta de cada espacio. Vive aqui y no en la vista
+  -- porque es propio del espacio, no de su tipo: dos salones de gala del mismo
+  -- recinto no sirven para lo mismo ni se montan igual.
+  ideal_para   VARCHAR(160),
+  estilo       VARCHAR(160),
   estado       ENUM('activo','mantenimiento','inactivo') NOT NULL DEFAULT 'activo',
   CHECK (capacidad >= 1),
   CHECK (costo_referencia >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Los proveedores no son solo un directorio de telefonos: el sitio publico los
+-- presenta como las marcas que son. De ahi `categoria` (misma lista que
+-- `recursos`, porque es lo que suministran), `descripcion` para la linea que
+-- acompana al nombre, `sitio_web`, `color_marca` para el monograma y `desde`
+-- para la antiguedad de la alianza. Asi la seccion de aliados sale de la base
+-- y no de una lista escrita a mano en la vista.
 CREATE TABLE proveedores (
   id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
   nombre       VARCHAR(120) NOT NULL UNIQUE,
+  categoria    ENUM('mobiliario','personal','audio_video','decoracion','transporte','otro') NOT NULL DEFAULT 'otro',
+  descripcion  VARCHAR(160),
+  logo         VARCHAR(120),
   contacto     VARCHAR(120),
   telefono     VARCHAR(25),
   correo       VARCHAR(120),
-  estado       ENUM('activo','inactivo') NOT NULL DEFAULT 'activo'
+  sitio_web    VARCHAR(160),
+  color_marca  CHAR(7) NOT NULL DEFAULT '#1f6b4f',
+  desde        SMALLINT UNSIGNED,
+  estado       ENUM('activo','inactivo') NOT NULL DEFAULT 'activo',
+  CONSTRAINT chk_proveedor_color CHECK (color_marca REGEXP '^#[0-9A-Fa-f]{6}$'),
+  CONSTRAINT chk_proveedor_desde CHECK (desde IS NULL OR desde BETWEEN 1950 AND 2100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE recursos (

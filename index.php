@@ -1,6 +1,6 @@
 <?php
 /**
- * ConectaEventos · front controller
+ * Solera · front controller
  */
 declare(strict_types=1);
 
@@ -26,6 +26,7 @@ use App\Controllers\RecursosController;
 use App\Controllers\ReportesController;
 use App\Controllers\ReservasController;
 use App\Controllers\RsvpController;
+use App\Controllers\SolicitudesController;
 use App\Controllers\SitioController;
 use App\Controllers\UsuariosController;
 
@@ -100,6 +101,12 @@ $router->get('/panel', [PanelController::class, 'index'], false, $lectura);
 $router->get('/buscar', [PanelController::class, 'buscar'], false, $lectura);
 
 /* Clientes */
+/* Solicitudes del sitio: la puerta de entrada comercial. Las ve quien
+ * atiende clientes; convertirlas en evento es cosa de comercial. */
+$router->get('/solicitudes', [SolicitudesController::class, 'index'], false, $leeClientes);
+$router->post('/solicitudes/{id}/estado', [SolicitudesController::class, 'estado'], false, $comercial);
+$router->post('/solicitudes/{id}/convertir', [SolicitudesController::class, 'convertir'], false, $comercial);
+
 $router->get('/clientes', [ClientesController::class, 'index'], false, $leeClientes);
 $router->get('/clientes/crear', [ClientesController::class, 'crear'], false, $comercial);
 $router->post('/clientes', [ClientesController::class, 'guardar'], false, $comercial);

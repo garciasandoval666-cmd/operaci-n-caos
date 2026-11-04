@@ -1,5 +1,5 @@
 -- ============================================================
---  ConectaEventos · datos ficticios de demostración
+--  Solera · datos ficticios de demostración
 --  Todos los datos son inventados.
 --  La contraseña demo de las ocho cuentas se muestra en la pantalla de acceso
 --  cuando APP_ENV=local; nunca se documenta en texto plano en este archivo.
@@ -22,19 +22,19 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 (8, 'auditor',       'Bitácora y reportes en modo lectura');
 
 INSERT INTO usuarios (id_usuario, id_rol, nombre, correo, password_hash, telefono) VALUES
-(1, 1, 'Ana Lucía Ramírez', 'admin@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9060'),
-(2, 2, 'Marco Antonio Solís', 'comercial@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9061'),
-(3, 3, 'Valeria Ortega', 'coordinacion@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9062'),
-(4, 4, 'Diego Fuentes', 'banquetes@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9063'),
-(5, 5, 'Sofía Mendoza', 'operaciones@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9064'),
-(6, 6, 'Luis Herrera', 'recepcion@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9065'),
-(7, 7, 'Paola Castillo', 'finanzas@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9066'),
-(8, 8, 'Rodrigo Nava', 'auditoria@conectaeventos.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9067');
+(1, 1, 'Ana Lucía Ramírez', 'admin@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9060'),
+(2, 2, 'Marco Antonio Solís', 'comercial@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9061'),
+(3, 3, 'Valeria Ortega', 'coordinacion@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9062'),
+(4, 4, 'Diego Fuentes', 'banquetes@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9063'),
+(5, 5, 'Sofía Mendoza', 'operaciones@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9064'),
+(6, 6, 'Luis Herrera', 'recepcion@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9065'),
+(7, 7, 'Paola Castillo', 'finanzas@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9066'),
+(8, 8, 'Rodrigo Nava', 'auditoria@solera.mx', '$2y$10$WOuT1d4NPBbFudS8pPUtKODrVvWKf5sYBZ26VFuSSGls0jS1yCVfO', '+52 55 4821 9067');
 
 INSERT INTO configuracion (clave, valor, descripcion) VALUES
-('empresa_nombre', 'ConectaEventos', 'Nombre comercial del recinto'),
+('empresa_nombre', 'Solera', 'Nombre comercial del recinto'),
 ('empresa_telefono', '+52 55 4821 9060', 'Teléfono de contacto'),
-('empresa_correo', 'hola@conectaeventos.mx', 'Correo de contacto'),
+('empresa_correo', 'hola@solera.mx', 'Correo de contacto'),
 ('empresa_direccion', 'Av. Paseo de la Reforma 265, Cuauhtémoc, CDMX', 'Dirección del recinto'),
 ('dias_limite_menu', '7', 'Días antes del evento en que se cierra el cambio de menú'),
 ('anticipo_porcentaje', '30', 'Porcentaje de anticipo requerido'),
@@ -77,18 +77,27 @@ INSERT INTO servicios (id_servicio, categoria, nombre, descripcion, precio_base)
 -- ------------------------------------------------------------
 -- Catálogos del módulo B
 -- ------------------------------------------------------------
-INSERT INTO espacios (id_espacio, nombre, tipo, capacidad, costo_referencia, descripcion, estado) VALUES
-(1, 'Salón Aurora', 'salon_fiesta', 150, 28000.00, 'Salón de fiestas con terraza y pista de baile', 'activo'),
-(2, 'Gran Salón Imperial', 'salon_gala', 400, 55000.00, 'Salón de gala con escenario y cabina de audio', 'activo'),
-(3, 'Galería Central', 'sala_exhibicion', 300, 38000.00, 'Sala diáfana para exposiciones y congresos', 'activo'),
-(4, 'Terraza Mirador', 'terraza', 90, 18000.00, 'Terraza al aire libre con vista a la ciudad', 'activo'),
-(5, 'Jardín de los Olivos', 'jardin', 220, 32000.00, 'Jardín con pérgola y área de ceremonia', 'mantenimiento');
+INSERT INTO espacios (id_espacio, nombre, tipo, capacidad, costo_referencia, descripcion, ideal_para, estilo, estado) VALUES
+(1, 'Salón Aurora', 'salon_fiesta', 150, 28000.00, 'Salón de fiestas con terraza y pista de baile', 'XV años, cumpleaños y bodas de hasta 150 invitados', 'Cálido, pista central y salida directa a terraza', 'activo'),
+(2, 'Gran Salón Imperial', 'salon_gala', 400, 55000.00, 'Salón de gala con escenario y cabina de audio', 'Bodas de gran formato, galas y premiaciones', 'Techo alto, escenario fijo e iluminación escénica', 'activo'),
+(3, 'Galería Central', 'sala_exhibicion', 300, 38000.00, 'Sala diáfana para exposiciones y congresos', 'Expos, congresos y montajes de varios días', 'Diáfano, modular y con carga y descarga directa', 'activo'),
+(4, 'Terraza Mirador', 'terraza', 90, 18000.00, 'Terraza al aire libre con vista a la ciudad', 'Cóctel de bienvenida y ceremonias al aire libre', 'Abierto, vista panorámica y toldo retráctil', 'activo'),
+(5, 'Jardín de los Olivos', 'jardin', 220, 32000.00, 'Jardín con pérgola y área de ceremonia', 'Ceremonias, sesiones de foto y recepciones', 'Natural, arbolado y con iluminación colgante', 'mantenimiento');
 
-INSERT INTO proveedores (id_proveedor, nombre, contacto, telefono, correo, estado) VALUES
-(1, 'Sillas y Mesas del Valle', 'Laura Pérez', '+52 55 2211 3344', 'laura@sillasdelvalle.example', 'activo'),
-(2, 'Sonido Pro MX', 'Carlos Ruiz', '+52 55 2233 4455', 'carlos@sonidopromx.example', 'activo'),
-(3, 'Staff Eventos Elite', 'Ana Torres', '+52 55 2244 5566', 'ana@staffelite.example', 'activo'),
-(4, 'Floralia Studio', 'Mónica Vega', '+52 55 2255 6677', 'monica@floralia.example', 'activo');
+-- Los cuatro primeros tienen recursos vinculados en el inventario; el resto
+-- son alianzas de servicio que el recinto contrata por evento. Los dominios
+-- usan `.example`, reservado por la RFC 2606 para documentacion: no existen y
+-- no pueden registrarse, asi que ningun correo de prueba sale a internet.
+INSERT INTO proveedores (id_proveedor, nombre, categoria, descripcion, logo, contacto, telefono, correo, sitio_web, color_marca, desde, estado) VALUES
+(1, 'Sillas y Mesas del Valle', 'mobiliario',  'Mobiliario de banquete, mantelería y montaje completo',  'sillas-y-mesas-del-valle.svg', 'Laura Pérez',   '+52 55 2211 3344', 'laura@sillasdelvalle.example',  'https://sillasdelvalle.example',  '#8a6512', 2019, 'activo'),
+(2, 'Sonido Pro MX',            'audio_video', 'Audio, iluminación escénica y proyección',               'sonido-pro-mx.svg',            'Carlos Ruiz',   '+52 55 2233 4455', 'carlos@sonidopromx.example',    'https://sonidopromx.example',     '#2a5280', 2020, 'activo'),
+(3, 'Staff Eventos Elite',      'personal',    'Capitanes, meseros y personal de montaje certificado',   'staff-eventos-elite.svg',      'Ana Torres',    '+52 55 2244 5566', 'ana@staffelite.example',        'https://staffelite.example',      '#1f6b4f', 2018, 'activo'),
+(4, 'Floralia Studio',          'decoracion',  'Diseño floral, ambientación y arcos de ceremonia',       'floralia-studio.svg',          'Mónica Vega',   '+52 55 2255 6677', 'monica@floralia.example',       'https://floralia.example',        '#b4403a', 2021, 'activo'),
+(5, 'Lente Abierto',            'otro',        'Fotografía y video documental de evento',                'lente-abierto.svg',            'Diego Salinas', '+52 55 2266 7788', 'diego@lenteabierto.example',    'https://lenteabierto.example',    '#504f4d', 2021, 'activo'),
+(6, 'Ritmo Vivo',               'otro',        'Música en vivo, DJ y producción de pista',               'ritmo-vivo.svg',               'Paulina Cruz',  '+52 55 2277 8899', 'paulina@ritmovivo.example',     'https://ritmovivo.example',       '#6b3f8a', 2022, 'activo'),
+(7, 'Imprenta Sierra',          'otro',        'Papelería, señalética y gráfica de evento',              'imprenta-sierra.svg',          'Hugo Sierra',   '+52 55 2288 9900', 'hugo@imprentasierra.example',   'https://imprentasierra.example',  '#2b323e', 2020, 'activo'),
+(8, 'Traslados Horizonte',      'transporte',  'Transporte de invitados y logística de carga',           'traslados-horizonte.svg',      'Elena Ruiz',    '+52 55 2299 0011', 'elena@horizonte.example',       'https://horizonte.example',       '#1f6b7a', 2023, 'activo'),
+(9, 'Hielo y Barra Central',    'otro',        'Barra de coctelería, cristalería y servicio de bebidas', 'hielo-y-barra-central.svg',    'Raúl Ponce',    '+52 55 2210 1122', 'raul@barracentral.example',     'https://barracentral.example',    '#8a5a12', 2022, 'activo');
 
 INSERT INTO recursos (id_recurso, id_proveedor, categoria, nombre, unidad, existencias_total, costo_referencia, estado) VALUES
 (1, 1, 'mobiliario', 'Silla Tiffany', 'pieza', 400, 15.00, 'activo'),
@@ -99,7 +108,19 @@ INSERT INTO recursos (id_recurso, id_proveedor, categoria, nombre, unidad, exist
 (6, 3, 'personal', 'Mesero', 'persona', 30, 450.00, 'activo'),
 (7, 3, 'personal', 'Edecán', 'persona', 12, 900.00, 'activo'),
 (8, 4, 'decoracion', 'Centro de mesa floral', 'pieza', 40, 650.00, 'activo'),
-(9, 1, 'mobiliario', 'Pista de baile 6x6', 'pieza', 2, 4500.00, 'activo');
+(9, 1, 'mobiliario', 'Pista de baile 6x6', 'pieza', 2, 4500.00, 'activo'),
+-- Inventario de los aliados de servicio: se contrata por evento, pero se
+-- aparta y se libera con las mismas reglas que una silla o un equipo de audio.
+(10, 5, 'otro',        'Cobertura fotográfica',    'servicio', 3,   8500.00, 'activo'),
+(11, 5, 'otro',        'Cabina de fotos',          'equipo',   2,   3200.00, 'activo'),
+(12, 6, 'audio_video', 'DJ con cabina',            'servicio', 3,   7800.00, 'activo'),
+(13, 6, 'otro',        'Grupo versátil 8 músicos', 'servicio', 2,  18500.00, 'activo'),
+(14, 7, 'otro',        'Señalética de evento',     'juego',    10,  1800.00, 'activo'),
+(15, 7, 'otro',        'Papelería de mesa',        'juego',    25,   650.00, 'activo'),
+(16, 8, 'transporte',  'Autobús 40 plazas',        'unidad',   3,   6500.00, 'activo'),
+(17, 8, 'transporte',  'Van ejecutiva 12 plazas',  'unidad',   4,   3200.00, 'activo'),
+(18, 9, 'otro',        'Barra móvil de coctelería','equipo',   3,   5200.00, 'activo'),
+(19, 9, 'otro',        'Cristalería de coctel',    'pieza',    600,    12.00, 'activo');
 
 INSERT INTO insumos_menu (id_insumo, nombre, categoria, unidad, stock_fisico, stock_comprometido, stock_minimo, costo_referencia, estado) VALUES
 (1, 'Canapés surtidos', 'entrada', 'porcion', 600.00, 340.00, 60.00, 25.00, 'activo'),
@@ -233,7 +254,7 @@ INSERT INTO invitados (id_invitado, id_evento, id_titular, nombre, correo, telef
 (11, 1, NULL, 'Emilio Navarro', 'emilio.navarro@example.com', '+52 55 1000 0011', 'general', 'lista_espera', '6d2a9e5c1b8f4703ad76c2e9b4f1a80d', NULL, 1, 'ninguna', NULL, 'Aforo completo al confirmar'),
 (12, 1, NULL, 'Revista Glam', 'prensa@glam.example', '+52 55 1000 0012', 'prensa', 'confirmado', '3c7f1b8e6d2a9504cf83b1e7a5d9c20e', 4, 3, 'ninguna', NULL, 'Cobertura autorizada'),
 (13, 1, NULL, 'Studio Lumen', 'foto@studiolumen.example', '+52 55 1000 0013', 'proveedor', 'confirmado', '9a4e7c2b5d1f8603be92a4d7c1f5b30f', 4, 3, 'ninguna', NULL, NULL),
-(14, 1, NULL, 'Staff Conecta', 'staff@conectaeventos.mx', '+52 55 1000 0014', 'staff', 'confirmado', 'b5d8f2a6c9e14703ad61b8e4f2c7a910', 4, 3, 'ninguna', NULL, NULL),
+(14, 1, NULL, 'Staff Conecta', 'staff@solera.mx', '+52 55 1000 0014', 'staff', 'confirmado', 'b5d8f2a6c9e14703ad61b8e4f2c7a910', 4, 3, 'ninguna', NULL, NULL),
 (15, 2, NULL, 'Laura Domínguez', 'laura.dominguez@novatech.example', '+52 55 2000 0001', 'vip', 'confirmado', '0f1e2d3c4b5a69788796a5b4c3d2e1f0', 5, 2, 'ninguna', NULL, 'Dirección general'),
 (16, 2, NULL, 'Sergio Ibarra', 'sergio.ibarra@novatech.example', '+52 55 2000 0002', 'general', 'confirmado', '1f2e3d4c5b6a79880a1b2c3d4e5f6071', 6, 2, 'vegetariano', NULL, NULL),
 (17, 2, NULL, 'Karla Núñez', 'karla.nunez@novatech.example', '+52 55 2000 0003', 'general', 'confirmado', '2f3e4d5c6b7a89891b2c3d4e5f607182', 6, 2, 'sin_gluten', NULL, NULL),

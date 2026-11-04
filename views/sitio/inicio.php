@@ -1,18 +1,16 @@
 <?php
 /** @var array $calendario */
+/** @var string $fechaElegida */
 /** @var array $proximos */
 /** @var array $espacios */
 /** @var array $tipos */
+/** @var array $aliados */
+/** @var int $aliadosConInventario */
 /** @var array $stats */
 /** @var string $mes */
 
 /* El recinto se presenta por el catálogo completo de tipos de evento, no por
    uno solo: la fila de la portada se arma con lo que haya en la base. */
-
-$aliados = [
-    'Casa Montiel', 'Florería Azahar', 'Sonido Nova', 'Banquetes Rubi',
-    'Lente Abierto', 'Mobiliario Lumen', 'Ritmo Vivo', 'Imprenta Sierra',
-];
 
 $etiquetasTipo = [
     'salon_gala'      => 'Salón de gala',
@@ -22,6 +20,9 @@ $etiquetasTipo = [
     'jardin'          => 'Jardín',
 ];
 
+/* Respaldo por tipo: lo que se muestra es la ficha del espacio (`ideal_para`
+   y `estilo`, en la base). Estos mapas solo cubren a un espacio recien dado de
+   alta al que aun no le han escrito la suya. */
 $idealPara = [
     'salon_gala'      => 'Bodas, galas corporativas y premiaciones',
     'salon_fiesta'    => 'XV años, cumpleaños y celebraciones privadas',
@@ -44,9 +45,9 @@ $estiloEspacio = [
      ===================================================================== -->
 <header class="l-nav">
     <div class="l-nav__caja">
-        <a class="l-marca" href="<?= e(url('/')) ?>" aria-label="ConectaEventos, inicio">
-            <span class="l-marca__sello">CE</span>
-            <span>ConectaEventos</span>
+        <a class="l-marca" href="<?= e(url('/')) ?>" aria-label="<?= e(marca()) ?>, inicio">
+            <span class="l-marca__sello"><?= logo() ?></span>
+            <span><?= e(marca()) ?></span>
         </a>
 
         <nav class="l-menu" aria-label="Secciones del sitio">
@@ -80,7 +81,7 @@ $estiloEspacio = [
         <span class="l-eyebrow l-eyebrow--claro">Bodas · Corporativo · Congresos · Graduaciones · Conciertos</span>
         <h1 class="l-display l-parte">Un recinto para cada celebración</h1>
         <div class="l-hero__acciones">
-            <a class="l-btn l-btn--crema" href="#contacto"><?= icono('calendario') ?> Agendar una visita</a>
+            <a class="l-btn l-btn--crema" href="#agenda"><?= icono('calendario') ?> Ver fechas y reservar</a>
             <a class="l-btn l-btn--fantasma" href="#espacios">Conocer los espacios</a>
         </div>
     </div>
@@ -100,10 +101,10 @@ $estiloEspacio = [
         <div class="l-ancho l-intro">
             <div class="l-reveal">
                 <span class="l-eyebrow">El recinto</span>
-                <h2 class="l-h3" style="margin-top:16px">Cuatro espacios, un mismo estándar</h2>
+                <h2 class="l-h3" style="margin-top:16px"><?= e(ucfirst(plural((int) $stats['espacios'], 'espacio', 'espacios'))) ?>, un mismo estándar</h2>
             </div>
             <div class="l-intro__texto l-reveal" style="--l-retraso:120ms">
-                <p class="l-lead">Llevamos la operacion completa de cada evento en un solo sistema: la
+                <p class="l-lead">Llevamos la operación completa de cada evento en un solo sistema: la
                     disponibilidad del espacio, el inventario, el menú, la cotización y la cobranza.
                     Nadie reserva dos veces el mismo salón ni descubre un faltante la noche del montaje.</p>
                 <p>Trabajamos igual de bien una boda de doscientos invitados que un congreso de tres días
@@ -199,9 +200,11 @@ $estiloEspacio = [
             <div class="l-cabeza l-reveal">
                 <span class="l-eyebrow l-eyebrow--claro">Los espacios</span>
                 <h2 class="l-h2 l-parte" style="margin-top:14px">Elige donde sucede</h2>
-                <p style="color:var(--sobre-ink-2)">Cuatro espacios con capacidades distintas. Se pueden
-                    combinar: cóctel en la terraza y cena en el salón, o registro en la galería y
-                    sesiones en el salón de gala.</p>
+                <p style="color:var(--sobre-ink-2)"><?= e(ucfirst(plural(count($espacios), 'espacio', 'espacios'))) ?> con capacidades
+                    de <?= number_format(min(array_map(static fn (array $e): int => (int) $e['capacidad'], $espacios))) ?>
+                    a <?= number_format(max(array_map(static fn (array $e): int => (int) $e['capacidad'], $espacios))) ?> invitados.
+                    Se pueden combinar: cóctel en la terraza y cena en el salón, o registro en la
+                    galería y sesiones en el salón de gala.</p>
             </div>
 
             <div class="l-espacios">
@@ -225,11 +228,11 @@ $estiloEspacio = [
                                 </div>
                                 <div class="l-espacio__dato">
                                     <dt>Ideal para</dt>
-                                    <dd><?= e($idealPara[$tipoEsp] ?? 'Eventos sociales y corporativos') ?></dd>
+                                    <dd><?= e($espacio['ideal_para'] ?: ($idealPara[$tipoEsp] ?? 'Eventos sociales y corporativos')) ?></dd>
                                 </div>
                                 <div class="l-espacio__dato">
                                     <dt>Estilo</dt>
-                                    <dd><?= e($estiloEspacio[$tipoEsp] ?? 'Montaje flexible') ?></dd>
+                                    <dd><?= e($espacio['estilo'] ?: ($estiloEspacio[$tipoEsp] ?? 'Montaje flexible')) ?></dd>
                                 </div>
                                 <div class="l-espacio__dato">
                                     <dt>Desde</dt>
@@ -251,9 +254,37 @@ $estiloEspacio = [
             <div class="l-cabeza l-reveal">
                 <span class="l-eyebrow">Agenda abierta</span>
                 <h2 class="l-h2 l-parte" style="margin-top:14px">¿Qué día tienes en mente?</h2>
-                <p>La disponibilidad que ves es la real: sale de las reservas confirmadas del recinto,
-                    no de un calendario aparte.</p>
+                <p>Toca el día que quieres y te llevamos al formulario con la fecha puesta.
+                    La disponibilidad que ves es la real: sale de las reservas confirmadas del
+                    recinto, no de un calendario aparte.</p>
             </div>
+
+            <?php /* Los tres pasos van antes del calendario porque la pregunta
+                     que trae al visitante hasta aquí es «cómo reservo».
+                     Responderla con una frase suelta en el pie no bastaba. */ ?>
+            <ol class="l-pasos l-reveal">
+                <li>
+                    <b>1</b>
+                    <div>
+                        <h3>Elige el día</h3>
+                        <p>Toca una fecha libre del calendario. Puedes cambiarla después.</p>
+                    </div>
+                </li>
+                <li>
+                    <b>2</b>
+                    <div>
+                        <h3>Envía la solicitud</h3>
+                        <p>Nombre, correo e invitados. Te confirmamos el espacio y el estimado.</p>
+                    </div>
+                </li>
+                <li>
+                    <b>3</b>
+                    <div>
+                        <h3>Apartamos la fecha</h3>
+                        <p>Con el anticipo, el día queda bloqueado en esta misma agenda.</p>
+                    </div>
+                </li>
+            </ol>
 
             <div class="l-intro" style="--l-cols:1">
                 <div class="l-reveal">
@@ -274,20 +305,56 @@ $estiloEspacio = [
                             <?php foreach ($calendario['celdas'] as $celda): ?>
                                 <?php if ($celda['dia'] === null): ?>
                                     <div class="l-cal__dia l-cal__dia--fuera" aria-hidden="true"></div>
+
+                                <?php elseif (!$celda['elegible']): ?>
+                                    <?php /* Fecha pasada: se muestra para no romper la rejilla,
+                                             pero no se puede pedir. */ ?>
+                                    <div class="l-cal__dia l-cal__dia--pasado" aria-hidden="true"><?= (int) $celda['dia'] ?></div>
+
                                 <?php else: ?>
-                                    <div class="l-cal__dia <?= $celda['ocupado'] ? 'l-cal__dia--ocupado' : 'l-cal__dia--libre' ?>"
-                                         <?= $celda['ocupado'] ? 'title="' . e('Reservado: ' . $celda['evento']) . '"' : 'title="Disponible"' ?>>
-                                        <?= (int) $celda['dia'] ?>
-                                    </div>
+                                    <?php
+                                    $diaTexto = fecha($celda['fecha'], 'D j') . ' de ' . fecha($celda['fecha'], 'F');
+                                    $libresDia = (int) $celda['libres'];
+
+                                    // El texto dice el numero exacto de espacios libres. Un dia
+                                    // con tres salones de cuatro no es «reservado», y decirlo
+                                    // asi costaba solicitudes que el recinto podia atender.
+                                    if ($celda['estado'] === 'completo') {
+                                        $detalle = 'sin espacios libres, escríbenos y buscamos una fecha cercana';
+                                    } elseif ($celda['estado'] === 'parcial') {
+                                        $detalle = plural($libresDia, 'espacio libre', 'espacios libres')
+                                            . ' · ocupado: ' . $celda['espacios'];
+                                    } else {
+                                        $detalle = plural($libresDia, 'espacio libre', 'espacios libres');
+                                    }
+
+                                    $esElegido = $celda['fecha'] === $fechaElegida;
+                                    $clases = 'l-cal__dia l-cal__dia--' . $celda['estado']
+                                        . ($celda['hoy'] ? ' es-hoy' : '')
+                                        . ($esElegido ? ' es-elegido' : '');
+                                    ?>
+                                    <a class="<?= e($clases) ?>"
+                                       href="<?= e(url('/?mes=' . $calendario['mes'] . '&fecha=' . $celda['fecha']) . '#solicitud') ?>"
+                                       data-dia="<?= e($celda['fecha']) ?>"
+                                       title="<?= e($diaTexto . ' · ' . $detalle) ?>"
+                                       aria-label="<?= e('Elegir el ' . $diaTexto . ': ' . $detalle) ?>"
+                                       <?= $esElegido ? 'aria-current="date"' : '' ?>>
+                                        <span><?= (int) $celda['dia'] ?></span>
+                                    </a>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
 
                         <div class="l-cal__leyenda">
-                            <span><i class="l-cal__punto" style="background:var(--menta)"></i> Disponible</span>
-                            <span><i class="l-cal__punto" style="background:var(--ink)"></i> Reservado</span>
-                            <span><?= e(plural((int) $calendario['ocupados'], 'día reservado', 'días reservados')) ?> este mes</span>
+                            <span><i class="l-cal__punto l-cal__punto--libre"></i> Todo libre</span>
+                            <span><i class="l-cal__punto l-cal__punto--parcial"></i> Quedan espacios</span>
+                            <span><i class="l-cal__punto l-cal__punto--completo"></i> Sin espacios</span>
                         </div>
+                        <p class="l-cal__pie">
+                            <?= e(plural((int) $calendario['con_libres'], 'día con espacio libre', 'días con espacio libre')) ?>
+                            en <?= e($calendario['etiqueta']) ?>, sobre
+                            <?= e(plural((int) $calendario['espacios_total'], 'espacio', 'espacios')) ?> del recinto.
+                        </p>
                     </div>
                 </div>
 
@@ -325,18 +392,39 @@ $estiloEspacio = [
     <!-- =================================================================
          Aliados
          ================================================================= -->
-    <section class="l-seccion l-seccion--apretada l-seccion--arena">
-        <div class="l-ancho" style="text-align:center;margin-bottom:34px">
-            <p class="l-reveal">Proveedores de confianza que trabajan con nosotros cada temporada</p>
-        </div>
-        <div class="l-marquesina">
-            <div class="l-marquesina__pista">
-                <?php foreach ($aliados as $aliado): ?>
-                    <div class="l-marquesina__item"><?= e($aliado) ?></div>
-                <?php endforeach; ?>
+    <?php if ($aliados !== []): ?>
+        <section class="l-seccion l-seccion--apretada l-seccion--arena">
+            <div class="l-ancho l-aliados__intro">
+                <p class="l-eyebrow l-reveal">Aliados del recinto</p>
+                <h2 class="l-parte">Quienes montan, suenan y decoran cada evento</h2>
+                <p class="l-reveal">
+                    <?= e(plural(count($aliados), 'proveedor', 'proveedores')) ?> en activo,
+                    <?= $aliadosConInventario === count($aliados) ? 'todos' : (int) $aliadosConInventario ?>
+                    con su inventario dentro del sistema: lo que se aparta para un evento deja de
+                    estar disponible para otro, sin llamadas ni hojas de cálculo.
+                </p>
             </div>
-        </div>
-    </section>
+            <div class="l-marquesina">
+                <div class="l-marquesina__pista">
+                    <?php foreach ($aliados as $aliado): ?>
+                        <?php
+                        $etiqueta = $aliado['sitio_web'] !== null && $aliado['sitio_web'] !== '' ? 'a' : 'div';
+                        ?>
+                        <<?= $etiqueta ?> class="l-aliado"
+                            <?php if ($etiqueta === 'a'): ?>
+                                href="<?= e($aliado['sitio_web']) ?>" target="_blank" rel="noopener noreferrer nofollow"
+                            <?php endif; ?>>
+                            <?= sello_proveedor($aliado, 52) ?>
+                            <span class="l-aliado__texto">
+                                <b><?= e($aliado['nombre']) ?></b>
+                                <span><?= e($aliado['descripcion'] ?: categoria_proveedor((string) $aliado['categoria'])) ?></span>
+                            </span>
+                        </<?= $etiqueta ?>>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <!-- =================================================================
          Contacto
@@ -354,7 +442,7 @@ $estiloEspacio = [
 
             <div class="l-ancho--angosto" style="margin-top:-56px;position:relative;z-index:3">
                 <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(24px,3vw,40px);box-shadow:var(--shadow-lg)">
-                    <form class="l-form" method="post" action="<?= e(url('/contacto')) ?>" data-una-vez>
+                    <form class="l-form" id="solicitud" method="post" action="<?= e(url('/contacto')) ?>" data-una-vez>
                         <?= csrf_field() ?>
                         <input type="hidden" name="origen" value="corporativo">
                         <?php /* Trampa de miel: oculta para las personas, visible
@@ -399,13 +487,20 @@ $estiloEspacio = [
                         <div class="l-form__fila">
                             <div class="l-campo">
                                 <label for="fecha_estimada">Fecha estimada</label>
-                                <input id="fecha_estimada" name="fecha_estimada" type="date" data-desde-hoy value="<?= viejo('fecha_estimada') ?>">
+                                <?php /* El valor por defecto es el dia que se toco en el
+                                         calendario; `viejo()` manda si el envio fallo. */ ?>
+                                <input id="fecha_estimada" name="fecha_estimada" type="date" data-desde-hoy value="<?= viejo('fecha_estimada', $fechaElegida) ?>">
                             </div>
                             <div class="l-campo">
                                 <label for="aforo">Invitados aproximados</label>
                                 <input id="aforo" name="aforo" type="number" min="1" max="5000" value="<?= viejo('aforo') ?>" placeholder="150">
                             </div>
                         </div>
+
+                        <?php /* El aviso lo rellena landing.js consultando la agenda real.
+                                Nace vacío y oculto: si el JavaScript no corre, el formulario
+                                sigue funcionando exactamente igual. */ ?>
+                        <p class="l-dispo" data-dispo hidden aria-live="polite"></p>
 
                         <div class="l-campo<?= error_campo('mensaje') ? ' l-campo--error' : '' ?>">
                             <label for="mensaje">Cuéntanos un poco más</label>
@@ -440,17 +535,17 @@ $estiloEspacio = [
                 </div>
 
                 <div class="l-pie__col">
-                    <h4>El sistema</h4>
-                    <a href="<?= e(url('/login')) ?>">Acceso al panel</a>
-                    <a href="<?= e(url('/salud')) ?>">Estado del servicio</a>
-                    <a href="<?= e(url('/sitio/disponibilidad')) ?>">Disponibilidad (API)</a>
+                    <h4>Accesos</h4>
+                    <a href="<?= e(url('/rsvp')) ?>">Confirmar asistencia</a>
+                    <a href="<?= e(url('/boda')) ?>">Historias del recinto</a>
+                    <a href="<?= e(url('/login')) ?>">Acceso del equipo</a>
                 </div>
 
                 <div class="l-pie__col">
                     <h4>Contacto</h4>
                     <p>Av. de los Recintos 128<br>Ciudad de México</p>
                     <p>55 1234 5678</p>
-                    <a href="mailto:hola@conectaeventos.mx">hola@conectaeventos.mx</a>
+                    <a href="mailto:hola@solera.mx">hola@solera.mx</a>
                 </div>
 
                 <div class="l-pie__col">
@@ -461,7 +556,7 @@ $estiloEspacio = [
             </div>
 
             <div class="l-pie__legal">
-                <span>© <?= date('Y') ?> ConectaEventos. Proyecto académico.</span>
+                <span>© <?= date('Y') ?> <?= e(marca()) ?>. Proyecto académico.</span>
                 <span>Operación Caos Digital · Módulos A, B, C y D</span>
             </div>
         </div>

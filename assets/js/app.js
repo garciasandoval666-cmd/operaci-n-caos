@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ConectaEventos · interacciones del panel
+   Solera · interacciones del panel
    ========================================================================== */
 (function () {
   "use strict";

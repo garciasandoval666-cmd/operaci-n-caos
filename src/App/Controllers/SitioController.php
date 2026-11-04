@@ -14,7 +14,29 @@ final class SitioController extends Controller
     public function inicio(): void
     {
         $pdo = Database::pdo();
-        $mes = (string) ($_GET['mes'] ?? date('Y-m'));
+
+        // Dia que el visitante eligio en el calendario. Viaja por la URL a
+        // proposito: asi elegir una fecha funciona igual sin JavaScript, y el
+        // enlace se puede compartir o guardar en favoritos ya con el dia
+        // puesto. Una fecha pasada se descarta en silencio.
+        $fechaElegida = trim((string) ($_GET['fecha'] ?? ''));
+        if ($fechaElegida !== '') {
+            $valida = preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaElegida) === 1
+                && $fechaElegida >= date('Y-m-d')
+                && checkdate(
+                    (int) substr($fechaElegida, 5, 2),
+                    (int) substr($fechaElegida, 8, 2),
+                    (int) substr($fechaElegida, 0, 4)
+                );
+            if (!$valida) {
+                $fechaElegida = '';
+            }
+        }
+
+        // El mes que se pinta. Si llega una fecha elegida y nadie pidio un mes
+        // concreto, se abre el mes de esa fecha: lo contrario seria mandar al
+        // visitante a un calendario donde su dia no se ve.
+        $mes = (string) ($_GET['mes'] ?? ($fechaElegida !== '' ? substr($fechaElegida, 0, 7) : date('Y-m')));
         if (!preg_match('/^\d{4}-\d{2}$/', $mes)) {
             $mes = date('Y-m');
         }
@@ -50,6 +72,25 @@ final class SitioController extends Controller
               ORDER BY t.id_tipo_evento"
         )->fetchAll();
 
+        // Los aliados del sitio publico son los proveedores activos de la base,
+        // con su marca. Antes la seccion mostraba ocho nombres inventados
+        // escritos en la vista, que no existian en ninguna tabla.
+        $aliados = $pdo->query(
+            "SELECT p.nombre, p.categoria, p.descripcion, p.logo, p.sitio_web, p.color_marca, p.desde,
+                    (SELECT COUNT(*) FROM recursos r WHERE r.id_proveedor = p.id_proveedor) AS recursos
+               FROM proveedores p
+              WHERE p.estado = 'activo'
+              ORDER BY p.desde IS NULL, p.desde, p.nombre"
+        )->fetchAll();
+
+        // No todos los aliados tienen inventario en el sistema: los de servicio
+        // se contratan por evento. El sitio dice el numero exacto en vez de
+        // afirmar de todos algo que solo es cierto de algunos.
+        $aliadosConInventario = count(array_filter(
+            $aliados,
+            static fn (array $a): bool => (int) $a['recursos'] > 0
+        ));
+
         $stats = [
             'eventos'    => (int) $pdo->query("SELECT COUNT(*) FROM eventos WHERE estado IN ('realizado','cerrado')")->fetchColumn(),
             'clientes'   => (int) $pdo->query('SELECT COUNT(*) FROM clientes')->fetchColumn(),
@@ -64,8 +105,11 @@ final class SitioController extends Controller
             'proximos'   => $proximos,
             'espacios'   => $espacios,
             'tipos'      => $tipos,
+            'aliados'    => $aliados,
+            'aliadosConInventario' => $aliadosConInventario,
             'stats'      => $stats,
             'mes'        => $mes,
+            'fechaElegida' => $fechaElegida,
         ], 'sitio');
     }
 
@@ -242,7 +286,7 @@ final class SitioController extends Controller
         $pdo = Database::pdo();
         $basico = [
             'ok'      => true,
-            'app'     => 'ConectaEventos',
+            'app'     => marca(),
             'version' => APP_VERSION,
             'hora'    => date('c'),
         ];
@@ -265,6 +309,15 @@ final class SitioController extends Controller
 
     /**
      * Construye las celdas del calendario público.
+     *
+     * La agenda no es un si/no. El recinto tiene varios espacios, asi que un
+     * dia con un salon reservado de cuatro sigue teniendo tres libres. Antes
+     * esta rejilla pintaba de negro cualquier dia con una sola reserva, y el
+     * visitante leia «no hay sitio» donde si lo habia: el calendario espantaba
+     * solicitudes que el recinto podia atender.
+     *
+     * Cada celda sale de aqui con el numero de espacios libres, el nombre de
+     * los ocupados y si la fecha ya paso. La vista solo pinta.
      */
     private function calendario(string $mes): array
     {
@@ -272,45 +325,88 @@ final class SitioController extends Controller
         $fin = $inicio->modify('last day of this month');
         $pdo = Database::pdo();
 
+        // El denominador de la agenda: cuantos espacios puede ofrecer el
+        // recinto. Solo los activos, para que el conteo de libres cuadre con
+        // lo que de verdad se puede reservar.
+        $totalEspacios = (int) $pdo->query(
+            "SELECT COUNT(*) FROM espacios WHERE estado = 'activo'"
+        )->fetchColumn();
+
         $stmt = $pdo->prepare(
-            "SELECT d.fecha, e.nombre, esp.nombre AS espacio
+            "SELECT d.fecha,
+                    COUNT(DISTINCT d.id_espacio) AS ocupados,
+                    GROUP_CONCAT(DISTINCT esp.nombre ORDER BY esp.nombre SEPARATOR ' · ') AS espacios
                FROM reserva_espacio_dias d
                JOIN reservas_espacio re ON re.id_reserva_espacio = d.id_reserva_espacio
                JOIN espacios esp ON esp.id_espacio = d.id_espacio
-               JOIN eventos e ON e.id_evento = re.id_evento
-              WHERE d.activa = 1 AND d.fecha BETWEEN ? AND ?
+              WHERE d.activa = 1
+                AND esp.estado = 'activo'
+                AND d.fecha BETWEEN ? AND ?
+              GROUP BY d.fecha
               ORDER BY d.fecha"
         );
         $stmt->execute([$inicio->format('Y-m-d'), $fin->format('Y-m-d')]);
-        $ocupados = [];
+
+        $reservas = [];
         foreach ($stmt->fetchAll() as $fila) {
-            $ocupados[$fila['fecha']] = $fila['nombre'];
+            $reservas[(string) $fila['fecha']] = [
+                'ocupados' => (int) $fila['ocupados'],
+                'espacios' => (string) $fila['espacios'],
+            ];
         }
 
         $celdas = [];
         $desplazamiento = (int) $inicio->format('N') - 1;
         for ($i = 0; $i < $desplazamiento; $i++) {
-            $celdas[] = ['dia' => null, 'ocupado' => false, 'hoy' => false, 'evento' => null];
+            $celdas[] = ['dia' => null];
         }
+
         $hoy = date('Y-m-d');
+        $conLibres = 0;
+        $completos = 0;
+
         for ($dia = 1; $dia <= (int) $fin->format('j'); $dia++) {
             $fecha = $inicio->setDate((int) $inicio->format('Y'), (int) $inicio->format('n'), $dia)->format('Y-m-d');
+            $ocupados = $reservas[$fecha]['ocupados'] ?? 0;
+            $libres = max(0, $totalEspacios - $ocupados);
+
+            // Una fecha que ya paso no se puede pedir, y por eso no se ofrece.
+            // Antes se pintaba «disponible», que es cierto y a la vez inutil.
+            if ($fecha < $hoy) {
+                $estado = 'pasado';
+            } elseif ($libres === 0) {
+                $estado = 'completo';
+                $completos++;
+            } elseif ($ocupados > 0) {
+                $estado = 'parcial';
+                $conLibres++;
+            } else {
+                $estado = 'libre';
+                $conLibres++;
+            }
+
             $celdas[] = [
-                'dia'     => $dia,
-                'fecha'   => $fecha,
-                'ocupado' => isset($ocupados[$fecha]),
-                'hoy'     => $fecha === $hoy,
-                'evento'  => $ocupados[$fecha] ?? null,
+                'dia'       => $dia,
+                'fecha'     => $fecha,
+                'estado'    => $estado,
+                'hoy'       => $fecha === $hoy,
+                'libres'    => $libres,
+                'ocupados'  => $ocupados,
+                'espacios'  => $reservas[$fecha]['espacios'] ?? '',
+                'elegible'  => $estado !== 'pasado',
             ];
         }
 
         return [
-            'mes'      => $mes,
-            'etiqueta' => fecha($inicio->format('Y-m-d'), 'F Y'),
-            'anterior' => $inicio->modify('-1 month')->format('Y-m'),
-            'siguiente'=> $inicio->modify('+1 month')->format('Y-m'),
-            'celdas'   => $celdas,
-            'ocupados' => count($ocupados),
+            'mes'       => $mes,
+            'etiqueta'  => fecha($inicio->format('Y-m-d'), 'F Y'),
+            'anterior'  => $inicio->modify('-1 month')->format('Y-m'),
+            'siguiente' => $inicio->modify('+1 month')->format('Y-m'),
+            'celdas'    => $celdas,
+            'espacios_total' => $totalEspacios,
+            'con_libres' => $conLibres,
+            'completos'  => $completos,
+            'ocupados'   => count($reservas),
         ];
     }
 }

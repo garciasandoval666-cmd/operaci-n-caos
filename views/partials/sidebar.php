@@ -4,9 +4,9 @@ $u = usuario_actual();
 ?>
 <aside class="sidebar" id="sidebar">
     <a class="sidebar__marca" href="<?= e(url('/panel')) ?>">
-        <span class="monograma">CE</span>
+        <span class="monograma"><?= logo() ?></span>
         <span>
-            <b>ConectaEventos</b>
+            <b><?= e(marca()) ?></b>
             <span>Operación integrada</span>
         </span>
     </a>
@@ -17,6 +17,13 @@ $u = usuario_actual();
             <a class="nav-item<?= nav_activo('/panel', '/buscar') ?>" href="<?= e(url('/panel')) ?>"><?= icono('panel') ?> Panel</a>
             <a class="nav-item<?= nav_activo('/eventos') ?>" href="<?= e(url('/eventos')) ?>"><?= icono('calendario') ?> Eventos</a>
             <?php if (puede(roles_grupo('clientes'))): ?>
+                <a class="nav-item<?= nav_activo('/solicitudes') ?>" href="<?= e(url('/solicitudes')) ?>">
+                    <?= icono('correo') ?> Solicitudes
+                    <?php $sinAtender = solicitudes_sin_atender(); ?>
+                    <?php if ($sinAtender > 0): ?>
+                        <span class="nav-item__cuenta"><?= (int) $sinAtender ?></span>
+                    <?php endif; ?>
+                </a>
                 <a class="nav-item<?= nav_activo('/clientes') ?>" href="<?= e(url('/clientes')) ?>"><?= icono('clientes') ?> Clientes</a>
             <?php endif; ?>
             <a class="nav-item<?= nav_activo('/invitados') ?>" href="<?= e(url('/invitados')) ?>"><?= icono('invitados') ?> Invitados</a>

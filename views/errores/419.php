@@ -1,6 +1,6 @@
 <?php /** @var string|null $error */ ?>
 <div class="error-page">
-    <div class="error-page__marca"><span class="monograma">CE</span> ConectaEventos</div>
+    <div class="error-page__marca"><span class="monograma"><?= logo() ?></span> <?= e(marca()) ?></div>
     <p class="error-page__codigo">419</p>
     <h1>La sesión expiró</h1>
     <p>Por seguridad, el formulario dejó de ser válido. Vuelve a cargar la página e inténtalo de nuevo.</p>

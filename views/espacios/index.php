@@ -197,6 +197,15 @@ $enMantenimiento = count(array_filter($espacios, static fn (array $e): bool => $
                             <textarea class="textarea" id="descripcion" name="descripcion" maxlength="255" rows="2" placeholder="Montaje, vista, equipamiento…"></textarea>
                         </div>
                         <div class="campo">
+                            <label for="ideal_para">Ideal para</label>
+                            <input class="input" type="text" id="ideal_para" name="ideal_para" maxlength="160" placeholder="Bodas de gran formato, galas y premiaciones">
+                            <span class="campo__ayuda">Se publica en la ficha del espacio, en el sitio.</span>
+                        </div>
+                        <div class="campo">
+                            <label for="estilo">Estilo</label>
+                            <input class="input" type="text" id="estilo" name="estilo" maxlength="160" placeholder="Techo alto, escenario fijo e iluminación escénica">
+                        </div>
+                        <div class="campo">
                             <label for="estado">Estado</label>
                             <select class="select" id="estado" name="estado">
                                 <option value="activo">Activo</option>

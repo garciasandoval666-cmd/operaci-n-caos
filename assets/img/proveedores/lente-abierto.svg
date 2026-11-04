@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Camara">
+  <rect width="64" height="64" rx="15" fill="#504f4d" fill-opacity=".12"/>
+  <g fill="none" stroke="#504f4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 25h7l3-5h10l3 5h7a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V28a3 3 0 0 1 3-3z"/><circle cx="32" cy="35" r="7"/>
+  </g>
+</svg>

@@ -31,7 +31,7 @@ $config = match ($estado) {
         <img src="https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?auto=compress&cs=tinysrgb&w=1400"
              alt="Detalle de una celebración en el recinto">
         <div class="b-rsvp__leyenda">
-            <span>ConectaEventos · Invitación</span>
+            <span><?= e(marca()) ?> · Invitación</span>
             <h2>Gracias por<br>responder.</h2>
             <p>Cada confirmación nos ayuda a preparar una celebración más cuidada para todos.</p>
         </div>
@@ -62,7 +62,7 @@ $config = match ($estado) {
             </div>
 
             <p class="b-rsvp__pie">
-                ¿Algo no coincide? Escribe a <a href="mailto:bodas@conectaeventos.mx">bodas@conectaeventos.mx</a>
+                ¿Algo no coincide? Escribe a <a href="mailto:bodas@solera.mx">bodas@solera.mx</a>
                 mencionando tu nombre y el evento.
             </p>
         </div>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ConectaEventos - sistema de diseno
+   Solera - sistema de diseno
    --------------------------------------------------------------------------
    Esta hoja es la base compartida: la cargan los cinco layouts (app, sitio,
    boda, auth y error), asi que aqui viven los tokens y cualquier cambio de
@@ -251,6 +251,11 @@ button { cursor: pointer; }
   border-radius: 12px;
   font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: -.06em;
 }
+/* El sello lleva el simbolo de la casa en SVG, que hereda el color del sello
+   y por eso sirve igual en el marfil del sitio que en la tinta del panel. */
+.monograma .logo { width: 22px; height: 22px; display: block; }
+.error-page__marca .monograma { width: 34px; height: 34px; border-radius: 10px; }
+.error-page__marca .monograma .logo { width: 19px; height: 19px; }
 .sidebar__marca b { display: block; font-family: var(--font-display); font-size: 16px; letter-spacing: -.02em; color: #fff; }
 .sidebar__marca > span:not(.monograma) > span { display: block; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--sobre-ink-2); margin-top: 2px; }
 
@@ -478,6 +483,39 @@ button { cursor: pointer; }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .tabla__avatar { width: 34px; height: 34px; border-radius: 9px; background: var(--paper-2); color: var(--ink); display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+/* Sello de una marca, compartido por el panel y el sitio publico.
+   Con logotipo es un <img>; sin el, el monograma sobre un fondo calculado a
+   partir de `--marca`, para que cualquier proveedor nuevo quede legible sin
+   tener que elegir dos colores. */
+.sello-marca {
+  flex-shrink: 0; border-radius: 13px; display: block;
+  background: var(--surface);
+}
+/* Contacto, telefono y correo apilados en una celda: como tres columnas
+   empujaban «Estado» fuera de la tarjeta. */
+.celda-contacto { display: grid; gap: 2px; line-height: 1.4; }
+.celda-contacto b { font-weight: 600; white-space: nowrap; }
+.celda-contacto span { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.celda-contacto a { color: var(--muted); }
+.celda-contacto a:hover { color: var(--ink); text-decoration: underline; }
+
+.enlace-sitio { display: inline-grid; place-items: center; color: var(--muted-2); vertical-align: middle; margin-left: 5px; }
+.enlace-sitio .icono { width: 13px; height: 13px; }
+.enlace-sitio:hover { color: var(--acento); }
+
+.sello-marca--texto {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  background: color-mix(in srgb, var(--marca) 14%, #fff);
+  color: var(--marca);
+  font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: -.02em;
+}
+
+/* El selector de color nativo se queda con el alto del resto de campos. */
+.input--color { padding: 4px; height: 42px; cursor: pointer; }
+.input--color::-webkit-color-swatch-wrapper { padding: 0; }
+.input--color::-webkit-color-swatch { border: 0; border-radius: 7px; }
+
 .tabla__vacia { padding: 46px 20px; text-align: center; color: var(--muted); font-size: 13px; }
 .tabla--compacta td { padding: 9px 12px; }
 .tabla--compacta th { padding: 8px 12px; }
@@ -668,6 +706,91 @@ button { cursor: pointer; }
 .auth__pie a:hover { color: #fff; }
 .auth__pie .icono { width: 14px; height: 14px; transition: transform var(--t-rapido) var(--ease); }
 .auth__pie a:hover .icono { transform: translateX(3px); }
+
+/* --------------------------------------------------------------------------
+   Bandeja de solicitudes
+   --------------------------------------------------------------------------
+   Tarjeta y no fila de tabla: cada solicitud trae un mensaje libre, una
+   comprobacion de disponibilidad y un formulario de conversion. Nada de eso
+   cabe en una celda.
+   -------------------------------------------------------------------------- */
+.solicitudes { display: grid; gap: 14px; }
+
+.solicitud {
+  border: 1px solid var(--line); border-radius: var(--r);
+  padding: 18px 20px; background: var(--surface);
+  display: grid; gap: 14px;
+  transition: border-color var(--t-rapido) var(--ease), box-shadow var(--t-rapido) var(--ease);
+}
+.solicitud:hover { border-color: var(--arena-2); box-shadow: var(--shadow-sm); }
+
+/* Lo que nadie ha tocado se distingue de un vistazo. Lo cerrado se apaga, para
+   que la bandeja se lea de arriba abajo por urgencia. */
+.solicitud--nuevo { border-left: 3px solid var(--amber); }
+.solicitud--contactado { border-left: 3px solid var(--blue); }
+.solicitud--convertido { border-left: 3px solid var(--green); }
+.solicitud--descartado { opacity: .72; }
+.solicitud--descartado:hover { opacity: 1; }
+
+.solicitud__cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.solicitud__quien { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.solicitud__quien b { display: block; font-size: 14.5px; letter-spacing: -.01em; }
+.solicitud__quien > div > span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.solicitud__quien a { color: var(--muted); }
+.solicitud__quien a:hover { color: var(--ink); text-decoration: underline; }
+.solicitud__sellos { display: grid; gap: 5px; justify-items: end; text-align: right; }
+
+.solicitud__datos {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;
+  margin: 0; padding: 14px 0; border-block: 1px solid var(--line-2);
+}
+.solicitud__datos dt { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); }
+.solicitud__datos dd { margin: 4px 0 0; font-size: 13px; color: var(--text); }
+
+.solicitud__mensaje {
+  margin: 0; padding: 12px 14px;
+  background: var(--surface-2); border-radius: var(--r-sm);
+  font-size: 13px; color: var(--muted); line-height: 1.55;
+}
+
+.solicitud__disponibilidad {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 11px 14px; border-radius: var(--r-sm);
+  font-size: 12.5px; line-height: 1.5;
+}
+.solicitud__disponibilidad .icono { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.solicitud__disponibilidad.es-libre { background: var(--green-soft); color: var(--green); }
+.solicitud__disponibilidad.es-ocupado { background: var(--amber-soft); color: var(--amber); }
+
+.solicitud__acciones { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.solicitud__acciones form { display: contents; }
+
+/* El formulario de conversion vive plegado: la bandeja se recorre para decidir,
+   y solo se despliega en la que se va a convertir. */
+.solicitud__convertir { width: 100%; }
+.solicitud__convertir > summary { list-style: none; cursor: pointer; width: max-content; }
+.solicitud__convertir > summary::-webkit-details-marker { display: none; }
+.solicitud__convertir[open] > summary { margin-bottom: 14px; }
+.solicitud__convertir .formulario {
+  padding: 18px; border: 1px dashed var(--arena-2); border-radius: var(--r);
+  background: var(--surface-2);
+}
+
+/* Contador de pendientes en la barra lateral. */
+.nav-item__cuenta {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px;
+  display: inline-grid; place-items: center;
+  border-radius: 999px; background: var(--amber); color: #fff;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .solicitud__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .solicitud__datos { grid-template-columns: 1fr; }
+  .solicitud__sellos { justify-items: start; text-align: left; }
+}
 
 /* --------------------------------------------------------------------------
    Responsive

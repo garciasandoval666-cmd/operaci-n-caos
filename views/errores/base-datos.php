@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Base de datos no disponible · ConectaEventos</title>
+    <title>Base de datos no disponible · Solera</title>
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -24,7 +25,7 @@
 </head>
 <body>
     <div class="caja">
-        <div class="marca"><span class="mono">CE</span> ConectaEventos</div>
+        <div class="marca"><span class="mono">S</span> Solera</div>
         <div class="punto">Servicio interrumpido</div>
         <h1>No pudimos conectar con la base de datos</h1>
         <p>La aplicación está en línea, pero el servidor de datos no respondió. Revisa que MySQL/MariaDB esté encendido y que las credenciales del archivo <code>.env</code> sean correctas.</p>

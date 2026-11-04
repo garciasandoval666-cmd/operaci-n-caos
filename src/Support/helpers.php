@@ -759,6 +759,8 @@ function accion_legible(string $accion): string
         'CREAR_USUARIO'            => 'Alta de usuario',
         'EDITAR_USUARIO'           => 'Edición de usuario',
         'LEAD_SITIO'               => 'Contacto desde el sitio',
+        'ESTADO_SOLICITUD'         => 'Seguimiento de solicitud',
+        'CONVERTIR_SOLICITUD'      => 'Solicitud convertida en evento',
     ];
 
     return $mapa[$accion] ?? ucfirst(mb_strtolower(str_replace('_', ' ', $accion)));
@@ -790,9 +792,151 @@ function accion_icono(string $accion): string
         str_contains($accion, 'USUARIO')                                => 'usuarios',
         str_contains($accion, 'EVENTO'), str_contains($accion, 'PROGRAMA') => 'calendario',
         str_contains($accion, 'REPORTE'), str_contains($accion, 'INCONSISTENCIA') => 'reportes',
-        str_contains($accion, 'LEAD')                                   => 'correo',
+        str_contains($accion, 'LEAD'), str_contains($accion, 'SOLICITUD') => 'correo',
         default                                                         => 'destello',
     };
+}
+
+/**
+ * Sello de un proveedor: su logotipo si lo tiene, su monograma si no.
+ *
+ * El nombre del archivo se valida contra los que existen de verdad en
+ * `assets/img/proveedores/`. Es una columna de la base y la base la escribe un
+ * formulario, asi que un `../../.env` ahi dentro no debe acabar en un `src`:
+ * lo que no este en la lista se trata como si no hubiera logo.
+ */
+function sello_proveedor(array $proveedor, int $tamano = 52): string
+{
+    $color = (string) ($proveedor['color_marca'] ?? '#1f6b4f');
+    if (preg_match('/^#[0-9a-fA-F]{6}$/', $color) !== 1) {
+        $color = '#1f6b4f';
+    }
+
+    $archivo = (string) ($proveedor['logo'] ?? '');
+    if ($archivo !== '' && in_array($archivo, logos_disponibles(), true)) {
+        return '<img class="sello-marca" src="' . e(asset('assets/img/proveedores/' . $archivo)) . '"'
+            . ' alt="" width="' . $tamano . '" height="' . $tamano . '" loading="lazy" decoding="async">';
+    }
+
+    return '<span class="sello-marca sello-marca--texto" style="--marca: ' . e($color) . '">'
+        . e(marca_monograma((string) ($proveedor['nombre'] ?? ''))) . '</span>';
+}
+
+/**
+ * Logotipos de proveedor que existen en disco.
+ *
+ * Se lee una vez por peticion. Sirve de lista blanca al pintar y de catalogo
+ * al elegir logo en el panel, de modo que las dos cosas no puedan discrepar.
+ *
+ * @return list<string>
+ */
+function logos_disponibles(): array
+{
+    static $lista = null;
+    if ($lista !== null) {
+        return $lista;
+    }
+    $rutas = glob(dirname(__DIR__, 2) . '/assets/img/proveedores/*.svg') ?: [];
+    $lista = array_values(array_map('basename', $rutas));
+    sort($lista);
+    return $lista;
+}
+
+/**
+ * Monograma de una marca: las iniciales con que se dibuja su sello.
+ *
+ * Se saltan las particulas (`y`, `de`, `del`, `la`...) porque no son parte del
+ * nombre comercial: «Sillas y Mesas del Valle» da SM, no SY. Si el nombre es
+ * de una sola palabra se toman sus dos primeras letras, que es lo que hace
+ * cualquier identidad de una sola palabra.
+ */
+/**
+ * Solicitudes del sitio que nadie ha atendido todavia.
+ *
+ * La barra lateral la pinta como contador. Se consulta una vez por peticion y
+ * un fallo de base devuelve cero: un numerito no puede tumbar el menu.
+ */
+function solicitudes_sin_atender(): int
+{
+    static $total = null;
+    if ($total !== null) {
+        return $total;
+    }
+    try {
+        $total = (int) Database::pdo()
+            ->query("SELECT COUNT(*) FROM leads WHERE estado = 'nuevo'")
+            ->fetchColumn();
+    } catch (Throwable) {
+        $total = 0;
+    }
+    return $total;
+}
+
+/**
+ * Nombre comercial del recinto.
+ *
+ * Vive en la tabla `configuracion`, no escrito en las vistas: cambiar de
+ * nombre tiene que ser cambiar una fila, no setenta literales repartidos por
+ * el proyecto. El valor por defecto solo cubre el caso de que la base no
+ * responda, que es justo cuando se pinta la pantalla de error.
+ */
+function marca(): string
+{
+    return (string) configuracion('empresa_nombre', 'Solera');
+}
+
+/**
+ * Simbolo de la casa, en SVG dentro del documento.
+ *
+ * Va inline y no como <img> para que herede `currentColor`: el mismo trazo
+ * sirve en tinta sobre marfil y en blanco sobre tinta, sin un archivo por
+ * variante y sin una peticion mas.
+ */
+function logo(string $clase = 'logo'): string
+{
+    return '<svg class="' . e($clase) . '" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">'
+        . '<path d="M4 27.2h24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'
+        . '<path d="M6.8 27.2V16.2a9.2 9.2 0 0 1 18.4 0v11" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
+        . '<path d="M12.9 27.2v-8.6a3.1 3.1 0 0 1 6.2 0v8.6" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
+        . '</svg>';
+}
+
+function marca_monograma(string $nombre): string
+{
+    $particulas = ['y', 'e', 'de', 'del', 'la', 'las', 'el', 'los', 'en', 'con', 'para', 'a'];
+
+    $palabras = array_values(array_filter(
+        preg_split('/[\s\-]+/u', trim($nombre)) ?: [],
+        static fn (string $palabra): bool => $palabra !== ''
+            && !in_array(mb_strtolower($palabra), $particulas, true)
+    ));
+
+    if ($palabras === []) {
+        return '??';
+    }
+    if (count($palabras) === 1) {
+        return mb_strtoupper(mb_substr($palabras[0], 0, 2));
+    }
+
+    return mb_strtoupper(mb_substr($palabras[0], 0, 1) . mb_substr($palabras[1], 0, 1));
+}
+
+/**
+ * Etiqueta legible de la categoria de un proveedor.
+ *
+ * Comparte la lista con `recursos.categoria`: lo que un proveedor suministra
+ * es lo que el inventario registra de el.
+ */
+function categoria_proveedor(string $categoria): string
+{
+    return [
+        'mobiliario'  => 'Mobiliario',
+        'personal'    => 'Personal',
+        'audio_video' => 'Audio y video',
+        'decoracion'  => 'Decoración',
+        'transporte'  => 'Transporte',
+        'otro'        => 'Servicios',
+    ][$categoria] ?? ucfirst($categoria);
 }
 
 function tipo_evento_icono(string $nombre): string

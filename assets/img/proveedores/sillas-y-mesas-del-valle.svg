@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Silla">
+  <rect width="64" height="64" rx="15" fill="#8a6512" fill-opacity=".12"/>
+  <g fill="none" stroke="#8a6512" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 17h18v15H23z"/><path d="M18 32h28"/><path d="M23 32v15M41 32v15"/><path d="M27 22h10"/>
+  </g>
+</svg>

@@ -19,7 +19,7 @@ $estadoActual = $invitado['estado_rsvp'] ?? 'pendiente';
         <img src="https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1400"
              alt="Mesa preparada para una celebración en el recinto">
         <div class="b-rsvp__leyenda">
-            <span>ConectaEventos · Invitación</span>
+            <span><?= e(marca()) ?> · Invitación</span>
             <h2>Nos encantará<br>verte ahí.</h2>
             <p>Confirma tu lugar, elige tu menú y cuéntanos si necesitas alguna consideración especial.</p>
         </div>
@@ -67,7 +67,7 @@ $estadoActual = $invitado['estado_rsvp'] ?? 'pendiente';
 
                 <div class="b-aviso mt-3">
                     <?= icono('correo') ?>
-                    ¿No tienes tu código? Escribe a <a href="mailto:bodas@conectaeventos.mx" style="text-decoration:underline">bodas@conectaeventos.mx</a> con tu nombre completo.
+                    ¿No tienes tu código? Escribe a <a href="mailto:bodas@solera.mx" style="text-decoration:underline">bodas@solera.mx</a> con tu nombre completo.
                 </div>
 
                 <?php if ($esLocal): ?>
@@ -152,7 +152,7 @@ $estadoActual = $invitado['estado_rsvp'] ?? 'pendiente';
             <?php endif; ?>
 
             <p class="b-rsvp__pie">
-                ¿Necesitas ayuda? <a href="mailto:bodas@conectaeventos.mx">bodas@conectaeventos.mx</a>
+                ¿Necesitas ayuda? <a href="mailto:bodas@solera.mx">bodas@solera.mx</a>
             </p>
         </div>
     </section>

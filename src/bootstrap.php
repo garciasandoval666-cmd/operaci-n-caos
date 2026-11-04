@@ -1,11 +1,11 @@
 <?php
 /**
- * ConectaEventos · arranque de la aplicación
+ * Solera · arranque de la aplicación
  */
 declare(strict_types=1);
 
 define('BASE_PATH', dirname(__DIR__));
-define('APP_VERSION', '1.1.0');
+define('APP_VERSION', '1.4.0');
 
 /* ---------------------------------------------------------------
  * Carga de variables de entorno (.env y .env.local)

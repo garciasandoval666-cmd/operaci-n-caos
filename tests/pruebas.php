@@ -1,6 +1,6 @@
 <?php
 /**
- * ConectaEventos · matriz de pruebas de integración
+ * Solera · matriz de pruebas de integración
  *
  * Ejecuta los casos críticos de los cuatro módulos directamente contra la capa
  * de dominio. Todo el recorrido ocurre dentro de una transacción externa con un
@@ -33,6 +33,7 @@ use App\Domain\Disponibilidad;
 use App\Domain\Eventos;
 use App\Domain\Insumos;
 use App\Domain\Invitados;
+use App\Domain\Solicitudes;
 
 $pdo = Database::pdo();
 
@@ -127,7 +128,7 @@ function huella(): array
  * Contexto de la corrida
  * ------------------------------------------------------------------ */
 
-echo "ConectaEventos · pruebas de integración\n";
+echo "Solera · pruebas de integración\n";
 echo 'Base de datos: ' . env('DB_DATABASE', 'conectaeventos') . ' @ ' . env('DB_HOST', '127.0.0.1') . ':' . env('DB_PORT', '3306') . "\n";
 echo 'Fecha del sistema: ' . date('Y-m-d H:i') . "\n\n";
 
@@ -445,6 +446,123 @@ caso('La exportación CSV neutraliza fórmulas y conserva números', static func
     afirmar($metodo->invoke($controlador, '-12.50') === '-12.50', 'Un número negativo debe conservarse.');
     afirmar($metodo->invoke($controlador, 1250.0) === '1250', 'Un número debe conservarse.');
     afirmar($metodo->invoke($controlador, 'Boda de Aurora') === 'Boda de Aurora', 'El texto normal no debe alterarse.');
+});
+
+/* ------------------------------------------------------------------
+ * Módulo A · solicitudes del sitio
+ * ------------------------------------------------------------------
+ * Van al final a proposito: dan de alta clientes y eventos que no estan
+ * en la demo, y el SAVEPOINT de `caso()` solo revierte cuando el caso
+ * falla. En medio de la matriz, las pruebas que cuentan los siete
+ * eventos del seed habrian visto mas de los que esperaban.
+ * ------------------------------------------------------------------ */
+
+caso('Convertir una solicitud crea cliente, evento y reserva en un paso', static function (): void {
+    $clientesAntes = (int) valor('SELECT COUNT(*) FROM clientes');
+
+    $r = Solicitudes::convertir(1, [
+        'id_tipo_evento' => 1,
+        'nombre'         => 'Boda de prueba desde solicitud',
+        'fecha_inicio'   => '2027-06-12 17:00:00',
+        'fecha_fin'      => '2027-06-12 23:00:00',
+        'aforo'          => 180,
+        'id_espacio'     => 2,
+    ]);
+
+    afirmar($r['cliente_nuevo'] === true, 'La solicitud 1 traía un correo que no era de ningún cliente.');
+    afirmar((int) valor('SELECT COUNT(*) FROM clientes') === $clientesAntes + 1, 'Debía crearse exactamente un cliente.');
+
+    $evento = fila('SELECT * FROM eventos WHERE id_evento = ' . (int) $r['id_evento']);
+    afirmar((string) $evento['estado'] === 'prospecto', 'El evento debe nacer como prospecto, no confirmado.');
+    afirmar((int) $evento['aforo_maximo'] === 180, 'El aforo pedido no llegó al evento.');
+    afirmar((int) $evento['id_cliente'] === (int) $r['id_cliente'], 'El evento no quedó enlazado a su cliente.');
+
+    afirmar(
+        (int) valor('SELECT COUNT(*) FROM reservas_espacio WHERE id_evento = ' . (int) $r['id_evento'] . " AND estado = 'confirmada'") === 1,
+        'El espacio elegido debía quedar reservado.'
+    );
+    afirmar((string) valor('SELECT estado FROM leads WHERE id_lead = 1') === 'convertido', 'La solicitud debía quedar marcada como convertida.');
+    afirmar(
+        (int) valor("SELECT COUNT(*) FROM bitacora WHERE accion = 'CONVERTIR_SOLICITUD' AND id_registro = 1") === 1,
+        'La conversión debe dejar rastro en bitácora.'
+    );
+});
+
+caso('Una solicitud no se convierte dos veces', static function (): void {
+    Solicitudes::convertir(3, [
+        'id_tipo_evento' => 2,
+        'nombre'         => 'XV de prueba',
+        'fecha_inicio'   => '2027-07-17 17:00:00',
+        'fecha_fin'      => '2027-07-17 23:00:00',
+        'aforo'          => 140,
+        'id_espacio'     => null,
+    ]);
+
+    esperarError(static fn () => Solicitudes::convertir(3, [
+        'id_tipo_evento' => 2,
+        'nombre'         => 'Intento duplicado',
+        'fecha_inicio'   => '2027-07-17 17:00:00',
+        'fecha_fin'      => '2027-07-17 23:00:00',
+        'aforo'          => 140,
+        'id_espacio'     => null,
+    ]), 'ya se convirtió');
+});
+
+caso('Un correo que ya es cliente no genera un cliente duplicado', static function (): void {
+    $correo = (string) valor('SELECT correo FROM clientes WHERE id_cliente = 1');
+    Database::pdo()->prepare(
+        "INSERT INTO leads (nombre, correo, tipo_evento, fecha_estimada, aforo, origen)
+         VALUES ('Cliente que repite', ?, 'Corporativo', '2027-09-15', 200, 'corporativo')"
+    )->execute([$correo]);
+    $idLead = (int) Database::pdo()->lastInsertId();
+
+    $clientesAntes = (int) valor('SELECT COUNT(*) FROM clientes');
+    $r = Solicitudes::convertir($idLead, [
+        'id_tipo_evento' => 3,
+        'nombre'         => 'Segundo evento del mismo cliente',
+        'fecha_inicio'   => '2027-09-15 10:00:00',
+        'fecha_fin'      => '2027-09-15 20:00:00',
+        'aforo'          => 200,
+        'id_espacio'     => null,
+    ]);
+
+    afirmar($r['cliente_nuevo'] === false, 'El cliente ya existía: no debía marcarse como nuevo.');
+    afirmar((int) $r['id_cliente'] === 1, 'El evento debía colgar del cliente que ya existía.');
+    afirmar((int) valor('SELECT COUNT(*) FROM clientes') === $clientesAntes, 'No debía crearse ningún cliente.');
+});
+
+caso('El estado «convertido» no se puede poner a mano', static function (): void {
+    esperarError(static fn () => Solicitudes::cambiarEstado(2, 'convertido'), 'no es válido');
+    esperarError(static fn () => Solicitudes::cambiarEstado(2, 'inventado'), 'no es válido');
+
+    Solicitudes::cambiarEstado(2, 'descartado');
+    afirmar((string) valor('SELECT estado FROM leads WHERE id_lead = 2') === 'descartado', 'El descarte no se guardó.');
+    afirmar(
+        (int) valor("SELECT COUNT(*) FROM historial_cambios WHERE entidad = 'leads' AND id_registro = 2") >= 1,
+        'El cambio de estado debe dejar historial.'
+    );
+});
+
+caso('La disponibilidad de una solicitud sale de las reservas reales', static function (): void {
+    $sinFecha = Solicitudes::disponibilidadPara(null, 100);
+    afirmar($sinFecha['comprobable'] === false, 'Sin fecha no hay nada que comprobar.');
+
+    // El 14 feb 2027 el Gran Salón Imperial está ocupado por la boda del seed.
+    $ocupado = Solicitudes::disponibilidadPara('2027-02-14', 400);
+    afirmar($ocupado['comprobable'] === true, 'Con fecha sí debe comprobarse.');
+    afirmar($ocupado['cabe'] === false, 'Ningún espacio libre ese día llega a 400 personas.');
+    afirmar($ocupado['ocupados'] >= 1, 'Ese día hay al menos un espacio reservado.');
+
+    $libre = Solicitudes::disponibilidadPara('2027-06-12', 100);
+    afirmar($libre['cabe'] === true, 'Esa fecha debería tener espacios libres para 100 personas.');
+});
+
+caso('El tipo de evento se deduce del texto libre del visitante', static function (): void {
+    afirmar(Solicitudes::tipoSugerido('Boda') === 1, 'No reconoció «Boda».');
+    afirmar(Solicitudes::tipoSugerido('graduacion') !== null, 'Debe reconocer «graduacion» sin acento ni mayúscula.');
+    afirmar(Solicitudes::tipoSugerido('Graduación') === Solicitudes::tipoSugerido('graduacion'), 'Con y sin acento deben caer en el mismo tipo.');
+    afirmar(Solicitudes::tipoSugerido('') === null, 'Un texto vacío no sugiere nada.');
+    afirmar(Solicitudes::tipoSugerido('Torneo de ajedrez') === null, 'Lo que no está en el catálogo lo decide una persona.');
 });
 
 /* ------------------------------------------------------------------

@@ -6,9 +6,9 @@ $esLocal = (string) env('APP_ENV', 'production') === 'local';
 <div class="auth">
     <section class="auth__visual">
         <a class="auth__marca" href="<?= e(url('/')) ?>">
-            <span class="monograma">CE</span>
+            <span class="monograma"><?= logo() ?></span>
             <span>
-                <b>ConectaEventos</b>
+                <b><?= e(marca()) ?></b>
                 <span>Recinto &amp; productora</span>
             </span>
         </a>
@@ -50,7 +50,7 @@ $esLocal = (string) env('APP_ENV', 'production') === 'local';
                     <label for="correo">Correo corporativo</label>
                     <input class="input" id="correo" name="correo" type="email" required autofocus
                            autocomplete="username" maxlength="120"
-                           value="<?= viejo('correo') ?>" placeholder="nombre@conectaeventos.mx">
+                           value="<?= viejo('correo') ?>" placeholder="nombre@solera.mx">
                 </div>
 
                 <div class="campo">
@@ -65,14 +65,14 @@ $esLocal = (string) env('APP_ENV', 'production') === 'local';
             <?php if ($esLocal): ?>
                 <div class="auth__demo">
                     <b>Acceso de demostración</b>
-                    <p>Administración: <code>admin@conectaeventos.mx</code></p>
+                    <p>Administración: <code>admin@solera.mx</code></p>
                     <p>Contraseña para todas las cuentas demo: <code>Conecta2026*</code></p>
                     <p class="texto-muted" style="font-size:11px;margin-top:8px">También hay cuentas demo para comercial, coordinación, banquetes, operaciones, recepción, finanzas y auditoría.</p>
                 </div>
             <?php endif; ?>
 
             <p class="texto-muted texto-xs" style="margin-top:20px">
-                ¿Problemas para entrar? Escribe a <a href="mailto:sistemas@conectaeventos.mx" style="color:var(--ink);text-decoration:underline">sistemas@conectaeventos.mx</a>.
+                ¿Problemas para entrar? Escribe a <a href="mailto:sistemas@solera.mx" style="color:var(--ink);text-decoration:underline">sistemas@solera.mx</a>.
                 La cuenta se bloquea temporalmente tras varios intentos fallidos.
             </p>
         </div>

@@ -48,6 +48,8 @@ final class EspaciosController extends Controller
         $capacidad = $this->entero('capacidad');
         $costo = $this->decimal('costo_referencia');
         $descripcion = $this->texto('descripcion');
+        $idealPara = $this->texto('ideal_para');
+        $estilo = $this->texto('estilo');
         $estado = $this->texto('estado');
 
         if ($nombre === '' || $capacidad < 1) {
@@ -68,8 +70,18 @@ final class EspaciosController extends Controller
         }
 
         $pdo->prepare(
-            'INSERT INTO espacios (nombre, tipo, capacidad, costo_referencia, descripcion, estado) VALUES (?, ?, ?, ?, ?, ?)'
-        )->execute([mb_substr($nombre, 0, 100), $tipo, $capacidad, $costo, $descripcion !== '' ? mb_substr($descripcion, 0, 255) : null, $estado]);
+            'INSERT INTO espacios (nombre, tipo, capacidad, costo_referencia, descripcion, ideal_para, estilo, estado)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([
+            mb_substr($nombre, 0, 100),
+            $tipo,
+            $capacidad,
+            $costo,
+            $descripcion !== '' ? mb_substr($descripcion, 0, 255) : null,
+            $idealPara !== '' ? mb_substr($idealPara, 0, 160) : null,
+            $estilo !== '' ? mb_substr($estilo, 0, 160) : null,
+            $estado,
+        ]);
 
         registrar_bitacora('CREAR_ESPACIO', 'espacios', (int) $pdo->lastInsertId(), $nombre . ' · ' . $capacidad . ' personas');
         $this->exito('Espacio creado correctamente.', '/espacios');

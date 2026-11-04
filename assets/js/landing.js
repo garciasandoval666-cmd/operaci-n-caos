@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ConectaEventos - movimiento del sitio publico
+   Solera - movimiento del sitio publico
    --------------------------------------------------------------------------
    Sin dependencias, a proposito. La politica de seguridad del proyecto
    declara `script-src 'self'`, asi que cualquier libreria desde un CDN
@@ -345,6 +345,142 @@
   /* ------------------------------------------------------------------------
      Detalles de formulario y avisos
      ---------------------------------------------------------------------- */
+  /* ------------------------------------------------------------------------
+     Disponibilidad en vivo del formulario de contacto
+     ------------------------------------------------------------------------
+     Antes, el visitante escribia una fecha a ciegas y descubria dias despues
+     que el recinto estaba ocupado. Ahora se le responde mientras escribe, con
+     la agenda real: la misma que ve el equipo en el panel.
+
+     Si algo falla -sin red, el endpoint caido, JavaScript desactivado- el
+     aviso simplemente no aparece y el formulario se envia igual. Nunca
+     bloquea el envio: la fecha es una intencion, no una reserva.
+     ---------------------------------------------------------------------- */
+  function iniciarDisponibilidad() {
+    const aviso = $("[data-dispo]");
+    const fecha = $("#fecha_estimada");
+    if (!aviso || !fecha) return;
+
+    const aforo = $("#aforo");
+    const base = document.body.dataset.base || "";
+    let ultima = "";
+    let temporizador = 0;
+
+    const pintar = (estado, texto) => {
+      aviso.textContent = texto;
+      aviso.className = "l-dispo l-dispo--" + estado;
+      aviso.hidden = false;
+    };
+
+    async function consultar() {
+      const dia = fecha.value;
+      if (!dia) { aviso.hidden = true; ultima = ""; return; }
+
+      const personas = Math.max(0, parseInt(aforo && aforo.value, 10) || 0);
+      const clave = dia + ":" + personas;
+      if (clave === ultima) return;
+      ultima = clave;
+
+      pintar("cargando", "Consultando la agenda…");
+
+      try {
+        const r = await fetch(base + "/sitio/disponibilidad?inicio=" + encodeURIComponent(dia) + "&fin=" + encodeURIComponent(dia), {
+          headers: { Accept: "application/json" },
+        });
+        if (!r.ok) throw new Error("respuesta " + r.status);
+        const datos = await r.json();
+        if (fecha.value !== dia) return;   // escribio otra fecha mientras tanto
+
+        const libres = (datos.espacios || []).filter((e) => e.libre);
+        const caben = personas > 0 ? libres.filter((e) => e.capacidad >= personas) : libres;
+
+        if (caben.length > 0) {
+          const nombres = caben.map((e) => e.nombre).join(", ");
+          // Sin articulo a proposito: «el Galería Central» y «la Salón
+          // Aurora» fallan con la mitad de los nombres del recinto.
+          pintar("libre", caben.length === 1
+            ? "Ese día tenemos libre " + nombres + "."
+            : "Ese día tenemos " + caben.length + " espacios libres: " + nombres + ".");
+        } else if (libres.length > 0 && personas > 0) {
+          const mayor = Math.max(...libres.map((e) => e.capacidad));
+          pintar("ajustado", "Ese día queda sitio, pero para " + mayor + " invitados como máximo. Escríbenos y buscamos la forma.");
+        } else {
+          pintar("ocupado", "Ese día lo tenemos comprometido. Mándanos la solicitud igual y te proponemos fechas cercanas.");
+        }
+      } catch {
+        // Un aviso que no se puede dar no debe dejar un «Consultando…» colgado.
+        aviso.hidden = true;
+        ultima = "";
+      }
+    }
+
+    const alEscribir = () => {
+      window.clearTimeout(temporizador);
+      temporizador = window.setTimeout(consultar, 350);
+    };
+
+    fecha.addEventListener("change", consultar);
+    fecha.addEventListener("input", alEscribir);
+    if (aforo) aforo.addEventListener("input", alEscribir);
+
+    if (fecha.value) consultar();
+  }
+
+  /* ------------------------------------------------------------------------
+     Reservar tocando el calendario
+
+     Cada dia reservable es un enlace de verdad: `/?mes=...&fecha=...#solicitud`.
+     Sin JavaScript el enlace recarga la portada con la fecha ya puesta en el
+     formulario, asi que elegir un dia funciona igual. Con JavaScript nos
+     ahorramos el viaje al servidor: rellenamos el campo, marcamos el dia y
+     bajamos al formulario.
+     ---------------------------------------------------------------------- */
+  function iniciarCalendario() {
+    const dias = $$("a.l-cal__dia[data-dia]");
+    if (dias.length === 0) return;
+
+    const campo = $("#fecha_estimada");
+    // Sin el campo no hay nada que rellenar: se dejan los enlaces en paz y
+    // el servidor hace el trabajo.
+    if (!campo) return;
+
+    const destino = $("#solicitud");
+
+    for (const dia of dias) {
+      dia.addEventListener("click", (ev) => {
+        // Ctrl/Cmd/medio: el visitante quiere otra pestana. No se la quitamos.
+        if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
+        ev.preventDefault();
+
+        campo.value = dia.dataset.dia;
+        for (const otro of dias) {
+          otro.classList.remove("es-elegido");
+          otro.removeAttribute("aria-current");
+        }
+        dia.classList.add("es-elegido");
+        dia.setAttribute("aria-current", "date");
+
+        // Despierta la consulta de disponibilidad, que escucha `change`.
+        campo.dispatchEvent(new Event("change", { bubbles: true }));
+
+        if (destino) {
+          destino.scrollIntoView({
+            behavior: menosMovimiento ? "auto" : "smooth",
+            block: "start",
+          });
+        }
+
+        // El foco va al primer dato que falta, no al que acabamos de poner.
+        const aforo = $("#aforo");
+        const siguiente = aforo && !aforo.value ? aforo : $("#nombre") || campo;
+        window.setTimeout(
+          () => siguiente.focus({ preventScroll: true }),
+          menosMovimiento ? 0 : 450
+        );
+      });
+    }
+  }
+
   function iniciarFormularios() {
     // Ninguna fecha de evento puede ser anterior a hoy.
     const hoy = new Date().toISOString().slice(0, 10);
@@ -391,6 +527,8 @@
     iniciarBaraja();
     iniciarContadores();
     iniciarFormularios();
+    iniciarDisponibilidad();
+    iniciarCalendario();
     iniciarAvisos();
     iniciarReveal();
     pedirCuadro();

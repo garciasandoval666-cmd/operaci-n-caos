@@ -13,9 +13,9 @@
      ===================================================================== -->
 <header class="l-nav">
     <div class="l-nav__caja">
-        <a class="l-marca" href="<?= e(url('/')) ?>" aria-label="ConectaEventos, inicio">
-            <span class="l-marca__sello">CE</span>
-            <span>ConectaEventos</span>
+        <a class="l-marca" href="<?= e(url('/')) ?>" aria-label="<?= e(marca()) ?>, inicio">
+            <span class="l-marca__sello"><?= logo() ?></span>
+            <span><?= e(marca()) ?></span>
         </a>
 
         <nav class="l-menu" aria-label="Secciones del sitio">
@@ -102,7 +102,7 @@
         <div class="l-ancho">
             <div class="l-cabeza l-reveal">
                 <span class="l-eyebrow">La mesa</span>
-                <h2 class="l-h2 l-parte" style="margin-top:14px">Tres formas de servir</h2>
+                <h2 class="l-h2 l-parte" style="margin-top:14px"><?= e(ucfirst(plural(count($menus), 'forma de servir', 'formas de servir'))) ?></h2>
                 <p>El menú se cotiza por persona y se congela al aceptar la cotización:
                     el precio que firmas es el que se cobra.</p>
             </div>
@@ -133,7 +133,9 @@
             <div class="l-cabeza l-reveal">
                 <span class="l-eyebrow">Dónde</span>
                 <h2 class="l-h2 l-parte" style="margin-top:14px">Elige la escala</h2>
-                <p>Desde una terraza para noventa personas hasta el salón de gala para cuatrocientas.</p>
+                <p>Desde <?= number_format(min(array_map(static fn (array $e): int => (int) $e['capacidad'], $espacios))) ?>
+                    hasta <?= number_format(max(array_map(static fn (array $e): int => (int) $e['capacidad'], $espacios))) ?>
+                    invitados, según el espacio.</p>
             </div>
 
             <div class="l-escalas">
@@ -188,15 +190,16 @@
                 </div>
 
                 <div class="l-pie__col">
-                    <h4>El sistema</h4>
-                    <a href="<?= e(url('/login')) ?>">Acceso al panel</a>
-                    <a href="<?= e(url('/salud')) ?>">Estado del servicio</a>
+                    <h4>Accesos</h4>
+                    <a href="<?= e(url('/rsvp')) ?>">Confirmar asistencia</a>
+                    <a href="<?= e(url('/')) ?>">Portada del recinto</a>
+                    <a href="<?= e(url('/login')) ?>">Acceso del equipo</a>
                 </div>
 
                 <div class="l-pie__col">
                     <h4>Contacto</h4>
                     <p>Av. de los Recintos 128<br>Ciudad de México</p>
-                    <a href="mailto:hola@conectaeventos.mx">hola@conectaeventos.mx</a>
+                    <a href="mailto:hola@solera.mx">hola@solera.mx</a>
                 </div>
 
                 <div class="l-pie__col">
@@ -206,7 +209,7 @@
             </div>
 
             <div class="l-pie__legal">
-                <span>© <?= date('Y') ?> ConectaEventos. Proyecto académico.</span>
+                <span>© <?= date('Y') ?> <?= e(marca()) ?>. Proyecto académico.</span>
                 <span>Operación Caos Digital · Módulos A, B, C y D</span>
             </div>
         </div>

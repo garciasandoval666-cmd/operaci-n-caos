@@ -1,6 +1,6 @@
 <?php /** @var string|null $error */ ?>
 <div class="error-page">
-    <div class="error-page__marca"><span class="monograma">CE</span> ConectaEventos</div>
+    <div class="error-page__marca"><span class="monograma"><?= logo() ?></span> <?= e(marca()) ?></div>
     <p class="error-page__codigo">403</p>
     <h1>Esta puerta no se abre con tu llave</h1>
     <p>Tu rol no tiene permiso para esta sección. Si necesitas acceso, solicítalo al administrador del sistema.</p>

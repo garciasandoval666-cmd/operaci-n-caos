@@ -193,7 +193,7 @@
                 </div>
                 <div class="campo">
                     <label for="nuevo-correo">Correo <span class="campo__req">*</span></label>
-                    <input class="input" id="nuevo-correo" name="correo" type="email" required maxlength="120" value="<?= viejo('correo') ?>" placeholder="persona@conectaeventos.mx">
+                    <input class="input" id="nuevo-correo" name="correo" type="email" required maxlength="120" value="<?= viejo('correo') ?>" placeholder="persona@solera.mx">
                 </div>
                 <div class="campo">
                     <label for="nuevo-rol">Rol <span class="campo__req">*</span></label>

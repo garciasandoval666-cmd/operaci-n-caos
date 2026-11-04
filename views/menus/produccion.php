@@ -22,7 +22,7 @@ $etiquetas = ['ninguna' => 'Sin restricción', 'vegetariano' => 'Vegetariano', '
 </div>
 
 <div class="aviso-print">
-    <b>ConectaEventos · Hoja de producción</b>
+    <b><?= e(marca()) ?> · Hoja de producción</b>
     <span><?= e($evento['nombre']) ?> · <?= e(fecha_larga($evento['fecha_inicio'])) ?></span>
 </div>
 

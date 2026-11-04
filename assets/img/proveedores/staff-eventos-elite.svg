@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Equipo">
+  <rect width="64" height="64" rx="15" fill="#1f6b4f" fill-opacity=".12"/>
+  <g fill="none" stroke="#1f6b4f" stroke-width="2.6" stroke-linecap="round">
+    <circle cx="25" cy="24" r="6"/><circle cx="41" cy="27" r="5"/><path d="M15 45c0-5.5 4.5-9 10-9s10 3.5 10 9M37 38c5 0 12 2 12 7" stroke-linecap="round"/>
+  </g>
+</svg>
